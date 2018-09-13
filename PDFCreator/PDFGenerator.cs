@@ -1,6 +1,10 @@
-﻿using iText.Kernel.Geom;
+﻿using iText.IO.Font;
+using iText.Kernel.Colors;
+using iText.Kernel.Font;
+using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas;
+using iText.Kernel.Pdf.Colorspace;
 using iText.Layout;
 using iText.Layout.Element;
 using System;
@@ -21,12 +25,14 @@ namespace PDFCreator
         Document document;
         float pageWidth;
         float pageHeight;
+        Color bbsBlue;
         
         public PDFGenerator()
         {
             PageSize ps = PageSize.A4;
             pageWidth = ps.GetWidth();
             pageHeight = ps.GetHeight();
+            bbsBlue = new DeviceRgb(0, 97, 160);
             GenerateFilePath();
         }
 
@@ -50,16 +56,16 @@ namespace PDFCreator
         private void SpoolPageOne()
         {            
             //title            
-            string title = "The Baptist Pension Scheme (BPS) – «EMPLOYER_NAME»";
-            Paragraph titlePara = new Paragraph(title);
+            string text = GetText(MergeField.Title);
+            Paragraph title = new Paragraph(text);
             float titleParaHeight = 126;
-            float titleParaWidth = 144;
-            titlePara.SetFontSize(13);
-            titlePara.SetFont("Arial");
-            titlePara.SetWidth(titleParaWidth);
-            titlePara.SetHeight(titleParaHeight);
-            titlePara.SetFixedPosition((pageWidth / 2 - titleParaWidth), pageHeight - titleParaHeight, titleParaWidth);
-            document.Add(titlePara);
+            float titleParaWidth = 200;
+            title.SetFontSize(13);
+            title.SetFontColor(bbsBlue);
+            title.SetWidth(titleParaWidth);
+            title.SetHeight(titleParaHeight);
+            title.SetFixedPosition((pageWidth / 2 - titleParaWidth), pageHeight - titleParaHeight, titleParaWidth);
+            document.Add(title);
         }
 
         #region helper methods
@@ -91,6 +97,30 @@ namespace PDFCreator
             para.SetRelativePosition(200, 200, 300, 200);
             AddParagraph(document, para);
             document.Close();
+        }
+
+        private string GetText(MergeField field)
+        {
+            var text = "";
+            switch (field)
+            {
+                case MergeField.Title:
+                    text = "The Baptist Pension Scheme (BPS) – «EMPLOYER_NAME»";
+                    break;
+                case MergeField.SubTitle:
+                    Console.WriteLine("Case 2");
+                    break;
+                default:
+                    //oops
+                    break;                
+            }
+            return text;
+        }
+
+        private enum MergeField
+        {
+            Title,
+            SubTitle
         }
         #endregion
     }
