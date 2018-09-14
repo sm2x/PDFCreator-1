@@ -54,18 +54,54 @@ namespace PDFCreator
         }
 
         private void SpoolPageOne()
-        {            
+        {
+            float titleParaHeight;
+            float titleParaWidth;
+            string text = "";
+            float verticalPosition = pageHeight;
+
             //title            
-            string text = GetText(MergeField.Title);
+            text = GetText(MergeField.Title);
             Paragraph title = new Paragraph(text);
-            float titleParaHeight = 126;
-            float titleParaWidth = 200;
+            titleParaHeight = 126;
+            titleParaWidth = pageWidth;
             title.SetFontSize(13);
+            title.SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER);
             title.SetFontColor(bbsBlue);
             title.SetWidth(titleParaWidth);
             title.SetHeight(titleParaHeight);
-            title.SetFixedPosition((pageWidth / 2 - titleParaWidth), pageHeight - titleParaHeight, titleParaWidth);
-            document.Add(title);
+            verticalPosition -= 230;
+            title.SetFixedPosition((pageWidth - titleParaWidth), verticalPosition, titleParaWidth);
+            document.Add(title);            
+
+            //estimated employer debt
+            text = GetText(MergeField.EstimatedEmployerDebt);
+            Paragraph employerDebt = new Paragraph(text);
+            titleParaHeight = 126;
+            titleParaWidth = pageWidth;
+            employerDebt.SetFontSize(13);
+            employerDebt.SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER);
+            employerDebt.SetFontColor(bbsBlue);
+            employerDebt.SetWidth(titleParaWidth);
+            employerDebt.SetHeight(titleParaHeight);
+            verticalPosition -= 30;
+            employerDebt.SetFixedPosition((pageWidth - titleParaWidth), verticalPosition, titleParaWidth);
+            document.Add(employerDebt);
+
+            //"Introduction"
+            text = "Introduction";
+            Paragraph intro = new Paragraph(text);
+            titleParaHeight = 126;
+            titleParaWidth = pageWidth;
+            intro.SetFontSize(13);
+            intro.SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER);
+            intro.SetFontColor(bbsBlue);
+            intro.SetUnderline();
+            intro.SetWidth(titleParaWidth);
+            intro.SetHeight(titleParaHeight);
+            verticalPosition -= 40;
+            intro.SetFixedPosition((pageWidth - titleParaWidth), verticalPosition, titleParaWidth);
+            document.Add(intro);
         }
 
         #region helper methods
@@ -107,8 +143,8 @@ namespace PDFCreator
                 case MergeField.Title:
                     text = "The Baptist Pension Scheme (BPS) – «EMPLOYER_NAME»";
                     break;
-                case MergeField.SubTitle:
-                    Console.WriteLine("Case 2");
+                case MergeField.EstimatedEmployerDebt:
+                    text = "Estimated Employer Debt as at «CessationDate»";
                     break;
                 default:
                     //oops
@@ -120,7 +156,7 @@ namespace PDFCreator
         private enum MergeField
         {
             Title,
-            SubTitle
+            EstimatedEmployerDebt
         }
         #endregion
     }
