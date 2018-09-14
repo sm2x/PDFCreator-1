@@ -7,6 +7,7 @@ using iText.Kernel.Pdf.Canvas;
 using iText.Kernel.Pdf.Colorspace;
 using iText.Layout;
 using iText.Layout.Element;
+using iText.Layout.Properties;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,12 +27,17 @@ namespace PDFCreator
         float pageWidth;
         float pageHeight;
         Color bbsBlue;
-        
+        float paraOffset;
+        float horizontalOffset;
+
+
         public PDFGenerator()
         {
             PageSize ps = PageSize.A4;
             pageWidth = ps.GetWidth();
             pageHeight = ps.GetHeight();
+            paraOffset = -30;
+            horizontalOffset = 130;
             bbsBlue = new DeviceRgb(0, 97, 160);
             GenerateFilePath();
         }
@@ -47,6 +53,7 @@ namespace PDFCreator
             writer = new PdfWriter(path);
             pdf = new PdfDocument(writer);
             document = new Document(pdf);
+            document.SetMargins(0, 100, 0, 100);
 
             SpoolPageOne();               
 
@@ -58,7 +65,7 @@ namespace PDFCreator
             float titleParaHeight;
             float titleParaWidth;
             string text = "";
-            float verticalPosition = pageHeight;
+            float verticalPosition = pageHeight;                       
 
             //title            
             text = GetText(MergeField.Title);
@@ -66,11 +73,11 @@ namespace PDFCreator
             titleParaHeight = 126;
             titleParaWidth = pageWidth;
             title.SetFontSize(13);
-            title.SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER);
+            title.SetTextAlignment(TextAlignment.CENTER);
             title.SetFontColor(bbsBlue);
             title.SetWidth(titleParaWidth);
             title.SetHeight(titleParaHeight);
-            verticalPosition -= 230;
+            verticalPosition -= 200;
             title.SetFixedPosition((pageWidth - titleParaWidth), verticalPosition, titleParaWidth);
             document.Add(title);            
 
@@ -80,7 +87,7 @@ namespace PDFCreator
             titleParaHeight = 126;
             titleParaWidth = pageWidth;
             employerDebt.SetFontSize(13);
-            employerDebt.SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER);
+            employerDebt.SetTextAlignment(TextAlignment.CENTER);
             employerDebt.SetFontColor(bbsBlue);
             employerDebt.SetWidth(titleParaWidth);
             employerDebt.SetHeight(titleParaHeight);
@@ -93,8 +100,8 @@ namespace PDFCreator
             Paragraph intro = new Paragraph(text);
             titleParaHeight = 126;
             titleParaWidth = pageWidth;
-            intro.SetFontSize(13);
-            intro.SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER);
+            intro.SetFontSize(11);
+            intro.SetTextAlignment(TextAlignment.CENTER);
             intro.SetFontColor(bbsBlue);
             intro.SetUnderline();
             intro.SetWidth(titleParaWidth);
@@ -102,6 +109,82 @@ namespace PDFCreator
             verticalPosition -= 40;
             intro.SetFixedPosition((pageWidth - titleParaWidth), verticalPosition, titleParaWidth);
             document.Add(intro);
+
+            //List of items            
+            List introList = new List(ListNumberingType.DECIMAL);                                    
+            titleParaWidth = pageWidth - horizontalOffset;
+            introList.SetFontSize(10);
+            introList.SetTextAlignment(TextAlignment.LEFT);
+            introList.SetWidth(titleParaWidth);
+            introList.SetMinHeight(150);
+            verticalPosition -= 240;            
+
+            //Item 1
+            ListItem listItemOne = new ListItem(GetText(MergeField.IntroListItemOne));
+            listItemOne.SetPaddingBottom(10);
+            introList.Add(listItemOne);            
+
+            //Item 2            
+            ListItem listItemTwo = new ListItem(GetText(MergeField.IntroListItemOne));            
+            listItemTwo.SetPaddingBottom(10);
+            introList.Add(listItemTwo);           
+
+            //Item 3  
+            ListItem listItemThree = new ListItem(GetText(MergeField.IntroListItemThree));
+            listItemThree.SetPaddingBottom(10);
+            introList.Add(listItemThree);
+
+            //Item 4
+            ListItem listItemFour = new ListItem(GetText(MergeField.IntroListItemFour));
+            listItemFour.SetPaddingBottom(10);
+            introList.Add(listItemFour);
+
+            //Item 5
+            ListItem listItemFive = new ListItem(GetText(MergeField.IntroListItemFive));
+            listItemFive.SetPaddingBottom(10);
+            introList.Add(listItemFive);
+
+            //Item 6
+            ListItem listItemSix = new ListItem(GetText(MergeField.IntroListItemSix));
+            listItemSix.SetPaddingBottom(10);
+            introList.Add(listItemSix);
+
+            //item 7
+            ListItem listItemSeven = new ListItem(GetText(MergeField.IntroListItemSeven));
+            listItemSeven.SetPaddingBottom(10);
+            introList.Add(listItemSeven);
+
+            //do nested lists
+            List list1 = new List(ListNumberingType.DECIMAL);
+            List listEL = new List(ListNumberingType.ENGLISH_LOWER);
+            listEL.Add("Parent item");
+            listEL.Add("Parent item");
+            ListItem liEL = new ListItem();
+            liEL.Add(listEL);
+            list1.Add(liEL);
+            List listEU = new List(ListNumberingType.ENGLISH_UPPER);
+            listEU.Add("Child item");
+            listEU.Add("Child item");
+            ListItem liEU = new ListItem();
+           
+            bool hasPreviousCEWords = true;
+            var testt = "•The total due would be greater(potentially significantly greater) if your organisation has previously incurred a separate cessation event.  «PreviousCEWords» \n ";
+            if (hasPreviousCEWords)
+            {
+                testt += "Our records indicate that your organisation incurred a cessation event previously, and we will be in touch with you about this separately in due course.";
+            }
+            testt += "•	The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.";
+            Paragraph tester = new Paragraph(testt);
+            tester.SetFontSize(11);
+            tester.SetWidth(titleParaWidth);
+            tester.SetHeight(titleParaHeight);
+            verticalPosition -= 10;
+            tester.SetFixedPosition((pageWidth - titleParaWidth), verticalPosition - 210, titleParaWidth);
+            document.Add(tester);
+
+            introList.SetFixedPosition((pageWidth - titleParaWidth - (horizontalOffset / 2)), verticalPosition, titleParaWidth);
+            document.Add(introList);
+
         }
 
         #region helper methods
@@ -146,6 +229,27 @@ namespace PDFCreator
                 case MergeField.EstimatedEmployerDebt:
                     text = "Estimated Employer Debt as at «CessationDate»";
                     break;
+                case MergeField.IntroListItemOne:
+                    text = "You do not need to take any action as a result of this document, which is for guidance only.  It provides an estimate of the employer debt that your organisation would need to pay, if it were to exit the defined benefit section of the BPS by paying its employer debt immediately.";
+                    break;
+                case MergeField.IntroListItemTwo:
+                    text = "The BPS and its advisers/administrators accept no liability to any organisation for any actions taken (or not taken) as a result of this estimate, the accompanying guidance notes and FAQs. It is each organisation’s responsibility to ensure that it understands the complex legal position in relation to Employer Debts, taking professional advice as necessary.";
+                    break;
+                case MergeField.IntroListItemThree:
+                    text = "There are a number of reasons why the actual figure in your circumstances could differ significantly from the figure set out below.  Please read the notes carefully in case this applies to you.";
+                    break;
+                case MergeField.IntroListItemFour:
+                    text = "Updated figures will be provided on a monthly basis and will rise and fall over time, depending on how the financial position of the Scheme alters.";
+                    break;
+                case MergeField.IntroListItemFive:
+                    text = "Updated figures will be provided on a monthly basis and will rise and fall over time, depending on how the financial position of the Scheme alters.";
+                    break;
+                case MergeField.IntroListItemSix:                    
+                    text = "If your organisation has incurred and/or settled a debt in the last 3 months then this estimate might not reflect your up-to-date position.  This is because the details of each employer’s status that are used in the estimated debt calculation are updated once per calendar quarter, so will not reflect more recent cessation events or debt payments.";            
+                    break;
+                case MergeField.IntroListItemSeven:
+                    text = "The estimate provided in this document might not reflect the total amount that would be due if your organisation incurs a cessation event.  In particular: \n";
+                    break;
                 default:
                     //oops
                     break;                
@@ -156,7 +260,14 @@ namespace PDFCreator
         private enum MergeField
         {
             Title,
-            EstimatedEmployerDebt
+            EstimatedEmployerDebt,
+            IntroListItemOne,
+            IntroListItemTwo,
+            IntroListItemThree,
+            IntroListItemFour,
+            IntroListItemFive,
+            IntroListItemSix,
+            IntroListItemSeven
         }
         #endregion
     }
