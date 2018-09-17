@@ -8,12 +8,12 @@ namespace PDFCreator
 {
     public class DataAccess
     {
-        public bool hasData;
+        public bool _hasData;
         Object dbObj;
 
-        public DataAccess()
+        public DataAccess(bool hasData)
         {
-            hasData = true;
+            _hasData = hasData;
             //call the db, hold object here in memory
             //dbObj = db.tbl_BPSMDEMergeFields(1);
         }
@@ -25,6 +25,10 @@ namespace PDFCreator
         public string GetCessationDate()
         {
             return "23 July 2018";
+        }
+        public string GetPreviousCEWord()
+        {            
+            return "Our records indicate that your organisation incurred a cessation event previously, and we will be in touch with you about this separately in due course.";
         }
     }
 }

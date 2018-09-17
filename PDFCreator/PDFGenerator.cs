@@ -20,28 +20,28 @@ namespace PDFCreator
 {
     public class PDFGenerator
     {
-        Random rnd = new Random();
-        string path = "";
-        PdfWriter writer;
-        PdfDocument pdf;
-        Document document;
-        float pageWidth;
-        float pageHeight;
-        Color baptistBlue;
-        float paraOffset;
-        float horizontalOffset;
-        DataAccess dataAccess;
+        Random _rnd = new Random();
+        string _path = "";
+        PdfWriter _writer;
+        PdfDocument _pdf;
+        Document _document;
+        float _pageWidth;
+        float _pageHeight;
+        Color _baptistBlue;
+        float _paraOffset;
+        float _horizontalOffset;
+        DataAccess _dataAccess;
 
 
         public PDFGenerator()
         {
             PageSize ps = PageSize.A4;
-            pageWidth = ps.GetWidth();
-            pageHeight = ps.GetHeight();
-            paraOffset = -30;
-            horizontalOffset = 130;
-            baptistBlue = new DeviceRgb(0, 176, 240);
-            dataAccess = new DataAccess();
+            _pageWidth = ps.GetWidth();
+            _pageHeight = ps.GetHeight();
+            _paraOffset = -30;
+            _horizontalOffset = 130;
+            _baptistBlue = new DeviceRgb(0, 176, 240);
+            _dataAccess = new DataAccess(true);
             GenerateFilePath();
         }
 
@@ -53,14 +53,14 @@ namespace PDFCreator
 
         private void CreateNewPDF()
         {
-            writer = new PdfWriter(path);
-            pdf = new PdfDocument(writer);
-            document = new Document(pdf);
-            document.SetMargins(0, 100, 0, 100);
+            _writer = new PdfWriter(_path);
+            _pdf = new PdfDocument(_writer);
+            _document = new Document(_pdf);
+            _document.SetMargins(0, 100, 0, 100);
 
             SpoolPageOne();               
 
-            document.Close();
+            _document.Close();
         }
 
         private void SpoolPageOne()
@@ -68,7 +68,7 @@ namespace PDFCreator
             float titleParaHeight;
             float titleParaWidth;
             string text = "";
-            float verticalPosition = pageHeight;
+            float verticalPosition = _pageHeight;
 
             //logo            
             string strFilePath = @"\\bbs-actuaries\dfsdata\users\hodsonl\Visual Studio 2017\Projects\PDFCreator\PDFCreator\Images\baptist.png";
@@ -76,65 +76,65 @@ namespace PDFCreator
             Image img = new Image(l);
             img.SetHeight(39);
             img.SetWidth(110);
-            img.SetFixedPosition(pageWidth - 180, pageHeight - 65);
-            document.Add(img);
+            img.SetFixedPosition(_pageWidth - 180, _pageHeight - 65);
+            _document.Add(img);
 
             //title            
             text = GetText(MergeField.Title);
             Paragraph title = new Paragraph(text);
             titleParaHeight = 126;
-            titleParaWidth = pageWidth;
+            titleParaWidth = _pageWidth;
             title.SetFontSize(13);
             title.SetBold();
             title.SetTextAlignment(TextAlignment.CENTER);
-            title.SetFontColor(baptistBlue);
+            title.SetFontColor(_baptistBlue);
             title.SetUnderline();
             title.SetWidth(titleParaWidth);
             title.SetHeight(titleParaHeight);
             verticalPosition -= 220;
-            title.SetFixedPosition((pageWidth - titleParaWidth), verticalPosition, titleParaWidth);
-            document.Add(title);            
+            title.SetFixedPosition((_pageWidth - titleParaWidth), verticalPosition, titleParaWidth);
+            _document.Add(title);            
 
             //estimated employer debt
             text = GetText(MergeField.EstimatedEmployerDebt);
             Paragraph employerDebt = new Paragraph(text);
             titleParaHeight = 126;
-            titleParaWidth = pageWidth;
+            titleParaWidth = _pageWidth;
             employerDebt.SetFontSize(13);
             employerDebt.SetUnderline();
             employerDebt.SetBold();
             employerDebt.SetTextAlignment(TextAlignment.CENTER);
-            employerDebt.SetFontColor(baptistBlue);
+            employerDebt.SetFontColor(_baptistBlue);
             employerDebt.SetWidth(titleParaWidth);
             employerDebt.SetHeight(titleParaHeight);
             verticalPosition -= 30;
-            employerDebt.SetFixedPosition((pageWidth - titleParaWidth), verticalPosition, titleParaWidth);
-            document.Add(employerDebt);
+            employerDebt.SetFixedPosition((_pageWidth - titleParaWidth), verticalPosition, titleParaWidth);
+            _document.Add(employerDebt);
 
             //"Introduction"
             text = "Introduction";
             Paragraph intro = new Paragraph(text);
             titleParaHeight = 126;
-            titleParaWidth = pageWidth;
+            titleParaWidth = _pageWidth;
             intro.SetFontSize(11);
             intro.SetTextAlignment(TextAlignment.CENTER);
-            intro.SetFontColor(baptistBlue);
+            intro.SetFontColor(_baptistBlue);
             intro.SetUnderline();
             intro.SetBold();
             intro.SetWidth(titleParaWidth);
             intro.SetHeight(titleParaHeight);
             verticalPosition -= 40;
-            intro.SetFixedPosition((pageWidth - titleParaWidth), verticalPosition, titleParaWidth);
-            document.Add(intro);
+            intro.SetFixedPosition((_pageWidth - titleParaWidth), verticalPosition, titleParaWidth);
+            _document.Add(intro);
 
             //List of items            
             List introList = new List(ListNumberingType.DECIMAL);                                    
-            titleParaWidth = pageWidth - horizontalOffset;
+            titleParaWidth = _pageWidth - _horizontalOffset;
             introList.SetFontSize(10);
             introList.SetTextAlignment(TextAlignment.LEFT);
             introList.SetWidth(titleParaWidth);
             introList.SetMinHeight(150);
-            verticalPosition -= 260;
+            verticalPosition -= 300;
 
             //Item 1
             Paragraph para = new Paragraph();
@@ -166,9 +166,19 @@ namespace PDFCreator
             listItemFive.SetPaddingBottom(10);
             introList.Add(listItemFive);
 
+            //item 5 nested list
+            List item5SubList = new List(ListNumberingType.ZAPF_DINGBATS_2);
+            item5SubList.Add("an employer debt only becomes due when an employer incurs a “cessation event”");
+            item5SubList.Add("a cessation event normally only occurs when an employer stops employing any active members of the BPS");            
+            item5SubList.SetFontSize(10);
+            item5SubList.SetFixedPosition((_pageWidth - titleParaWidth - 50), verticalPosition + 115, titleParaWidth);
+            _document.Add(item5SubList);
+            
+
             //Item 6
             ListItem listItemSix = new ListItem(GetText(MergeField.IntroListItemSix));
             listItemSix.SetPaddingBottom(10);
+            listItemSix.SetPaddingTop(40);
             introList.Add(listItemSix);
 
             //item 7
@@ -176,17 +186,17 @@ namespace PDFCreator
             listItemSeven.SetPaddingBottom(10);
             introList.Add(listItemSeven);                     
 
-            introList.SetFixedPosition((pageWidth - titleParaWidth - (horizontalOffset / 2)), verticalPosition, titleParaWidth);
-            document.Add(introList);
+            introList.SetFixedPosition((_pageWidth - titleParaWidth - (_horizontalOffset / 2)), verticalPosition, titleParaWidth);
+            _document.Add(introList);
 
             //nested list
             List item7SubList = new List(ListNumberingType.ZAPF_DINGBATS_2);
-            item7SubList.Add(" The total due would be greater (potentially significantly greater) if your organisation has previously incurred a separate cessation event.  «PreviousCEWords»");
-            item7SubList.Add(" The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.");
+            item7SubList.Add(string.Format("The total due would be greater (potentially significantly greater) if your organisation has previously incurred a separate cessation event. ", _dataAccess.GetPreviousCEWord()));
+            item7SubList.Add("The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.");
             verticalPosition -= 140;
             item7SubList.SetFontSize(10);
-            item7SubList.SetFixedPosition((pageWidth - titleParaWidth - 50), verticalPosition, titleParaWidth);
-            document.Add(item7SubList);
+            item7SubList.SetFixedPosition((_pageWidth - titleParaWidth - 50), verticalPosition, titleParaWidth);
+            _document.Add(item7SubList);
 
 
         }
@@ -199,27 +209,9 @@ namespace PDFCreator
 
         private void GenerateFilePath()
         {
-            path = @"\\bbs-actuaries\dfsdata\users\hodsonl\pdfs\test";
-            path += rnd.Next(1, 1000);
-            path += ".pdf";
-        }
-
-        private void ModifyExistingDocument()
-        {
-            string oldFile = @"\\bbs-actuaries\dfsdata\users\hodsonl\pdfs\Template.pdf";
-            string newFile = path;
-
-            // open the reader       
-            PdfDocument pdfDocument = new PdfDocument(new PdfReader(oldFile), new PdfWriter(newFile));
-            Document document = new Document(pdfDocument);
-
-            Paragraph para = new Paragraph("This is a test!!!!!!!!");
-            PageSize ps = PageSize.A4;
-            var width = ps.GetWidth();
-            var height = ps.GetHeight();
-            para.SetRelativePosition(200, 200, 300, 200);
-            AddParagraph(document, para);
-            document.Close();
+            _path = @"\\bbs-actuaries\dfsdata\users\hodsonl\pdfs\test";
+            _path += _rnd.Next(1, 1000);
+            _path += ".pdf";
         }
 
         private string GetText(MergeField field)
@@ -228,10 +220,10 @@ namespace PDFCreator
             switch (field)
             {
                 case MergeField.Title:
-                    text = string.Format("The Baptist Pension Scheme (BPS) – {0}", dataAccess.GetEmployerName());                    
+                    text = string.Format("The Baptist Pension Scheme (BPS) – {0}", _dataAccess.GetEmployerName());                    
                     break;
                 case MergeField.EstimatedEmployerDebt:
-                    text = string.Format("Estimated Employer Debt as at {0} ", dataAccess.GetCessationDate());
+                    text = string.Format("Estimated Employer Debt as at {0} ", _dataAccess.GetCessationDate());
                     break;
                 case MergeField.IntroListItemOnePartOne:
                     text = "You do not need to take any action ";                    
