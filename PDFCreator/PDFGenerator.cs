@@ -41,7 +41,7 @@ namespace PDFCreator
             _paraOffset = -30;
             _horizontalOffset = 130;
             _baptistBlue = new DeviceRgb(0, 176, 240);
-            _dataAccess = new DataAccess(true);
+            _dataAccess = new DataAccess(false);
             GenerateFilePath();
         }
 
@@ -174,7 +174,6 @@ namespace PDFCreator
             item5SubList.SetFixedPosition((_pageWidth - titleParaWidth - 50), verticalPosition + 115, titleParaWidth);
             _document.Add(item5SubList);
             
-
             //Item 6
             ListItem listItemSix = new ListItem(GetText(MergeField.IntroListItemSix));
             listItemSix.SetPaddingBottom(10);
@@ -191,9 +190,18 @@ namespace PDFCreator
 
             //nested list
             List item7SubList = new List(ListNumberingType.ZAPF_DINGBATS_2);
-            item7SubList.Add(string.Format("The total due would be greater (potentially significantly greater) if your organisation has previously incurred a separate cessation event. ", _dataAccess.GetPreviousCEWord()));
+            string previousCEWords = _dataAccess.GetPreviousCEWord();
+            item7SubList.Add(string.Format("The total due would be greater (potentially significantly greater) if your organisation has previously incurred a separate cessation event. {0}", previousCEWords));
             item7SubList.Add("The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.");
-            verticalPosition -= 140;
+            if (string.IsNullOrEmpty(previousCEWords))
+            {
+                verticalPosition -= 140;
+            }
+            else
+            {
+                verticalPosition -= 160;
+            }
+            
             item7SubList.SetFontSize(10);
             item7SubList.SetFixedPosition((_pageWidth - titleParaWidth - 50), verticalPosition, titleParaWidth);
             _document.Add(item7SubList);

@@ -27,8 +27,15 @@ namespace PDFCreator
             return "23 July 2018";
         }
         public string GetPreviousCEWord()
-        {            
-            return "Our records indicate that your organisation incurred a cessation event previously, and we will be in touch with you about this separately in due course.";
+        {        
+            if(_hasData)
+            {
+                return "Our records indicate that your organisation incurred a cessation event previously, and we will be in touch with you about this separately in due course.";
+            }
+            else
+            {
+                return "";
+            }            
         }
     }
 }
