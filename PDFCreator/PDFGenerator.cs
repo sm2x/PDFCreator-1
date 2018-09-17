@@ -30,6 +30,7 @@ namespace PDFCreator
         Color baptistBlue;
         float paraOffset;
         float horizontalOffset;
+        DataAccess dataAccess;
 
 
         public PDFGenerator()
@@ -40,6 +41,7 @@ namespace PDFCreator
             paraOffset = -30;
             horizontalOffset = 130;
             baptistBlue = new DeviceRgb(0, 176, 240);
+            dataAccess = new DataAccess();
             GenerateFilePath();
         }
 
@@ -132,15 +134,20 @@ namespace PDFCreator
             introList.SetTextAlignment(TextAlignment.LEFT);
             introList.SetWidth(titleParaWidth);
             introList.SetMinHeight(150);
-            verticalPosition -= 240;            
+            verticalPosition -= 260;
 
             //Item 1
-            ListItem listItemOne = new ListItem(GetText(MergeField.IntroListItemOne));
-            listItemOne.SetPaddingBottom(10);
-            introList.Add(listItemOne);            
+            Paragraph para = new Paragraph();
+            para.Add(new Text(GetText(MergeField.IntroListItemOnePartOne)).SetBold());
+            para.Add(new Text(GetText(MergeField.IntroListItemOnePartTwo)));
 
+            ListItem listItemOne = new ListItem();
+            listItemOne.Add(para);
+            listItemOne.SetPaddingBottom(10);            
+            introList.Add(listItemOne);
+            
             //Item 2            
-            ListItem listItemTwo = new ListItem(GetText(MergeField.IntroListItemOne));            
+            ListItem listItemTwo = new ListItem(GetText(MergeField.IntroListItemTwo));            
             listItemTwo.SetPaddingBottom(10);
             introList.Add(listItemTwo);           
 
@@ -174,31 +181,14 @@ namespace PDFCreator
 
             //nested list
             List item7SubList = new List(ListNumberingType.ZAPF_DINGBATS_2);
-            item7SubList.Add("       The total due would be greater (potentially significantly greater) if your organisation has previously incurred a separate cessation event.  «PreviousCEWords»");
-            item7SubList.Add("       The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.");
+            item7SubList.Add(" The total due would be greater (potentially significantly greater) if your organisation has previously incurred a separate cessation event.  «PreviousCEWords»");
+            item7SubList.Add(" The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.");
             verticalPosition -= 140;
             item7SubList.SetFontSize(10);
             item7SubList.SetFixedPosition((pageWidth - titleParaWidth - 50), verticalPosition, titleParaWidth);
             document.Add(item7SubList);
 
 
-
-
-            
-            //bool hasPreviousCEWords = true;
-            //var testt = "•The total due would be greater(potentially significantly greater) if your organisation has previously incurred a separate cessation event.  «PreviousCEWords» \n ";
-            //if (hasPreviousCEWords)
-            //{
-            //    testt += "Our records indicate that your organisation incurred a cessation event previously, and we will be in touch with you about this separately in due course.";
-            //}
-            //testt += "•	The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.";
-            //Paragraph tester = new Paragraph(testt);
-            //tester.SetFontSize(11);
-            //tester.SetWidth(titleParaWidth);
-            //tester.SetHeight(titleParaHeight);
-            //verticalPosition -= 10;
-            //tester.SetFixedPosition((pageWidth - titleParaWidth), verticalPosition - 210, titleParaWidth);
-            //document.Add(tester);
         }
 
         #region helper methods
@@ -238,13 +228,16 @@ namespace PDFCreator
             switch (field)
             {
                 case MergeField.Title:
-                    text = "The Baptist Pension Scheme (BPS) – «EMPLOYER_NAME»";
+                    text = string.Format("The Baptist Pension Scheme (BPS) – {0}", dataAccess.GetEmployerName());                    
                     break;
                 case MergeField.EstimatedEmployerDebt:
-                    text = "Estimated Employer Debt as at «CessationDate»";
+                    text = string.Format("Estimated Employer Debt as at {0} ", dataAccess.GetCessationDate());
                     break;
-                case MergeField.IntroListItemOne:
-                    text = "You do not need to take any action as a result of this document, which is for guidance only.  It provides an estimate of the employer debt that your organisation would need to pay, if it were to exit the defined benefit section of the BPS by paying its employer debt immediately.";
+                case MergeField.IntroListItemOnePartOne:
+                    text = "You do not need to take any action ";                    
+                    break;
+                case MergeField.IntroListItemOnePartTwo:                    
+                    text = "as a result of this document, which is for guidance only.  It provides an estimate of the employer debt that your organisation would need to pay, if it were to exit the defined benefit section of the BPS by paying its employer debt immediately.";
                     break;
                 case MergeField.IntroListItemTwo:
                     text = "The BPS and its advisers/administrators accept no liability to any organisation for any actions taken (or not taken) as a result of this estimate, the accompanying guidance notes and FAQs. It is each organisation’s responsibility to ensure that it understands the complex legal position in relation to Employer Debts, taking professional advice as necessary.";
@@ -256,7 +249,7 @@ namespace PDFCreator
                     text = "Updated figures will be provided on a monthly basis and will rise and fall over time, depending on how the financial position of the Scheme alters.";
                     break;
                 case MergeField.IntroListItemFive:
-                    text = "Updated figures will be provided on a monthly basis and will rise and fall over time, depending on how the financial position of the Scheme alters.";
+                    text = "This document is for your information. It is not a demand for payment, and you do not need to take any action:";
                     break;
                 case MergeField.IntroListItemSix:                    
                     text = "If your organisation has incurred and/or settled a debt in the last 3 months then this estimate might not reflect your up-to-date position.  This is because the details of each employer’s status that are used in the estimated debt calculation are updated once per calendar quarter, so will not reflect more recent cessation events or debt payments.";            
@@ -269,15 +262,14 @@ namespace PDFCreator
                     break;                
             }
             return text;
-        }
-
-        
+        }        
 
         private enum MergeField
         {
             Title,
             EstimatedEmployerDebt,
-            IntroListItemOne,
+            IntroListItemOnePartOne,
+            IntroListItemOnePartTwo,
             IntroListItemTwo,
             IntroListItemThree,
             IntroListItemFour,
