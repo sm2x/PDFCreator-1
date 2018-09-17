@@ -27,22 +27,19 @@ namespace PDFCreator
         Document _document;
         float _pageWidth;
         float _pageHeight;
-        Color _baptistBlue;
-        float _paraOffset;
+        Color _baptistBlue;        
         float _horizontalOffset;
         DataAccess _dataAccess;
         float _verticalPosition;
         float _titleParaHeight;
-        float _titleParaWidth;
-        string _text;
+        float _titleParaWidth;        
 
 
         public PDFGenerator()
         {
             PageSize ps = PageSize.A4;
             _pageWidth = ps.GetWidth();
-            _pageHeight = ps.GetHeight();
-            _paraOffset = -30;
+            _pageHeight = ps.GetHeight();            
             _horizontalOffset = 130;
             _baptistBlue = new DeviceRgb(0, 176, 240);
             _dataAccess = new DataAccess(false);
@@ -51,11 +48,6 @@ namespace PDFCreator
         }
 
         public void SpoolPDF()
-        {
-            CreateNewPDF();
-        }
-
-        private void CreateNewPDF()
         {
             _writer = new PdfWriter(_path);
             _pdf = new PdfDocument(_writer);
@@ -66,7 +58,7 @@ namespace PDFCreator
             SpoolPageTwo();
 
             _document.Close();
-        }
+        }  
 
         private void SpoolPageOne()
         {                 
@@ -167,8 +159,50 @@ namespace PDFCreator
 
             NewPage();
             AddLogo();
+
             _verticalPosition -= 220;
-            AddTitle(GetText(MergeField.EstimatedEmployerDebt));
+            AddTitle("Estimated Employer Debt");
+
+            //employer debt list
+            List employerDebtList = new List(ListNumberingType.DECIMAL);
+            _titleParaWidth = _pageWidth - _horizontalOffset;
+            employerDebtList.SetFontSize(10);
+            employerDebtList.SetTextAlignment(TextAlignment.LEFT);
+            employerDebtList.SetWidth(_titleParaWidth);
+            employerDebtList.SetMinHeight(150);
+
+            //Item 1                   
+            ListItem employerDebtListLi = new ListItem(GetText(MergeField.EstimatedEmployerDebtParagraph));
+            employerDebtListLi.SetPaddingBottom(10);
+            employerDebtList.Add(employerDebtListLi);
+
+            _verticalPosition -= 50;
+            employerDebtList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);
+            _document.Add(employerDebtList);
+
+            _verticalPosition -= 60;
+            AddTitle("Comparison with previous figure");
+
+            //comparison with previous figure list
+            List comparisonList = new List(ListNumberingType.DECIMAL);
+            _titleParaWidth = _pageWidth - _horizontalOffset;
+            comparisonList.SetFontSize(10);
+            comparisonList.SetTextAlignment(TextAlignment.LEFT);
+            comparisonList.SetWidth(_titleParaWidth);
+            comparisonList.SetMinHeight(150);
+
+            //Item 1                   
+            ListItem comparisonListLi = new ListItem(GetText(MergeField.ComparisonPreviousFigure));
+            comparisonListLi.SetPaddingBottom(10);
+            comparisonList.Add(comparisonListLi);
+
+            _verticalPosition -= 50;
+            employerDebtList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);
+            _document.Add(employerDebtList);
+
+            _verticalPosition -= 60;
+            AddTitle("Do I need to do anything?");
+
         }
 
         #region helper methods      
@@ -213,12 +247,14 @@ namespace PDFCreator
                     break;
                 case MergeField.IntroListItemSeven:
                     text = "The estimate provided in this document might not reflect the total amount that would be due if your organisation incurs a cessation event.  In particular: \n";
+                    break;                          
+                case MergeField.EstimatedEmployerDebtParagraph:
+                    text = string.Format("The estimated employer debt for your organisation at {0} is {1}.  The calculation is summarised in Table 1 below. This figure has been calculated using this “assumed” cessation date based on financial conditions near the month end, but unless your organisation happened to have an actual cessation event on this date, no employer debt is due to be paid at this time based on this cessation date and this estimated debt.  The figure is for information only.", _dataAccess.GetCessationDate(), _dataAccess.GetCessationAmount());
                     break;
-                case MergeField.EstimatedEmployerDebt:
-                    text = "Estimated Employer Debt";
+                case MergeField.ComparisonPreviousFigure:
+                    text = "Figures for individual employers may vary from month to month as a result of changes in Scheme membership (for example, retirements, deaths or transfers out of the Scheme), as well as reflecting the general trend.";
                     break;
-                default:
-                    //oops
+                default:                    
                     break;                
             }
             return text;
@@ -235,8 +271,9 @@ namespace PDFCreator
             IntroListItemFour,
             IntroListItemFive,
             IntroListItemSix,
-            IntroListItemSeven,
-            EstimatedEmployerDebt
+            IntroListItemSeven,            
+            EstimatedEmployerDebtParagraph,
+            ComparisonPreviousFigure
         }
 
         private void NewPage()

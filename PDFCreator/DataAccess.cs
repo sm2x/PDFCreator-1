@@ -37,5 +37,9 @@ namespace PDFCreator
                 return "";
             }            
         }
+        public string GetCessationAmount()
+        {
+            return "£200,000";
+        }
     }
 }
