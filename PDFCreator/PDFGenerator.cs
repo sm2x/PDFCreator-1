@@ -1,4 +1,5 @@
 ﻿using iText.IO.Font;
+using iText.IO.Image;
 using iText.Kernel.Colors;
 using iText.Kernel.Font;
 using iText.Kernel.Geom;
@@ -26,7 +27,7 @@ namespace PDFCreator
         Document document;
         float pageWidth;
         float pageHeight;
-        Color bbsBlue;
+        Color baptistBlue;
         float paraOffset;
         float horizontalOffset;
 
@@ -38,7 +39,7 @@ namespace PDFCreator
             pageHeight = ps.GetHeight();
             paraOffset = -30;
             horizontalOffset = 130;
-            bbsBlue = new DeviceRgb(0, 97, 160);
+            baptistBlue = new DeviceRgb(0, 176, 240);
             GenerateFilePath();
         }
 
@@ -65,7 +66,16 @@ namespace PDFCreator
             float titleParaHeight;
             float titleParaWidth;
             string text = "";
-            float verticalPosition = pageHeight;                       
+            float verticalPosition = pageHeight;
+
+            //logo            
+            string strFilePath = @"\\bbs-actuaries\dfsdata\users\hodsonl\Visual Studio 2017\Projects\PDFCreator\PDFCreator\Images\baptist.png";
+            ImageData l = ImageDataFactory.Create(strFilePath);
+            Image img = new Image(l);
+            img.SetHeight(39);
+            img.SetWidth(110);
+            img.SetFixedPosition(pageWidth - 180, pageHeight - 65);
+            document.Add(img);
 
             //title            
             text = GetText(MergeField.Title);
@@ -73,11 +83,13 @@ namespace PDFCreator
             titleParaHeight = 126;
             titleParaWidth = pageWidth;
             title.SetFontSize(13);
+            title.SetBold();
             title.SetTextAlignment(TextAlignment.CENTER);
-            title.SetFontColor(bbsBlue);
+            title.SetFontColor(baptistBlue);
+            title.SetUnderline();
             title.SetWidth(titleParaWidth);
             title.SetHeight(titleParaHeight);
-            verticalPosition -= 200;
+            verticalPosition -= 220;
             title.SetFixedPosition((pageWidth - titleParaWidth), verticalPosition, titleParaWidth);
             document.Add(title);            
 
@@ -87,8 +99,10 @@ namespace PDFCreator
             titleParaHeight = 126;
             titleParaWidth = pageWidth;
             employerDebt.SetFontSize(13);
+            employerDebt.SetUnderline();
+            employerDebt.SetBold();
             employerDebt.SetTextAlignment(TextAlignment.CENTER);
-            employerDebt.SetFontColor(bbsBlue);
+            employerDebt.SetFontColor(baptistBlue);
             employerDebt.SetWidth(titleParaWidth);
             employerDebt.SetHeight(titleParaHeight);
             verticalPosition -= 30;
@@ -102,8 +116,9 @@ namespace PDFCreator
             titleParaWidth = pageWidth;
             intro.SetFontSize(11);
             intro.SetTextAlignment(TextAlignment.CENTER);
-            intro.SetFontColor(bbsBlue);
+            intro.SetFontColor(baptistBlue);
             intro.SetUnderline();
+            intro.SetBold();
             intro.SetWidth(titleParaWidth);
             intro.SetHeight(titleParaHeight);
             verticalPosition -= 40;
@@ -152,39 +167,38 @@ namespace PDFCreator
             //item 7
             ListItem listItemSeven = new ListItem(GetText(MergeField.IntroListItemSeven));
             listItemSeven.SetPaddingBottom(10);
-            introList.Add(listItemSeven);
-
-            //do nested lists
-            List list1 = new List(ListNumberingType.DECIMAL);
-            List listEL = new List(ListNumberingType.ENGLISH_LOWER);
-            listEL.Add("Parent item");
-            listEL.Add("Parent item");
-            ListItem liEL = new ListItem();
-            liEL.Add(listEL);
-            list1.Add(liEL);
-            List listEU = new List(ListNumberingType.ENGLISH_UPPER);
-            listEU.Add("Child item");
-            listEU.Add("Child item");
-            ListItem liEU = new ListItem();
-           
-            bool hasPreviousCEWords = true;
-            var testt = "•The total due would be greater(potentially significantly greater) if your organisation has previously incurred a separate cessation event.  «PreviousCEWords» \n ";
-            if (hasPreviousCEWords)
-            {
-                testt += "Our records indicate that your organisation incurred a cessation event previously, and we will be in touch with you about this separately in due course.";
-            }
-            testt += "•	The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.";
-            Paragraph tester = new Paragraph(testt);
-            tester.SetFontSize(11);
-            tester.SetWidth(titleParaWidth);
-            tester.SetHeight(titleParaHeight);
-            verticalPosition -= 10;
-            tester.SetFixedPosition((pageWidth - titleParaWidth), verticalPosition - 210, titleParaWidth);
-            document.Add(tester);
+            introList.Add(listItemSeven);                     
 
             introList.SetFixedPosition((pageWidth - titleParaWidth - (horizontalOffset / 2)), verticalPosition, titleParaWidth);
             document.Add(introList);
 
+            //nested list
+            List item7SubList = new List(ListNumberingType.ZAPF_DINGBATS_2);
+            item7SubList.Add("       The total due would be greater (potentially significantly greater) if your organisation has previously incurred a separate cessation event.  «PreviousCEWords»");
+            item7SubList.Add("       The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.");
+            verticalPosition -= 140;
+            item7SubList.SetFontSize(10);
+            item7SubList.SetFixedPosition((pageWidth - titleParaWidth - 50), verticalPosition, titleParaWidth);
+            document.Add(item7SubList);
+
+
+
+
+            
+            //bool hasPreviousCEWords = true;
+            //var testt = "•The total due would be greater(potentially significantly greater) if your organisation has previously incurred a separate cessation event.  «PreviousCEWords» \n ";
+            //if (hasPreviousCEWords)
+            //{
+            //    testt += "Our records indicate that your organisation incurred a cessation event previously, and we will be in touch with you about this separately in due course.";
+            //}
+            //testt += "•	The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.";
+            //Paragraph tester = new Paragraph(testt);
+            //tester.SetFontSize(11);
+            //tester.SetWidth(titleParaWidth);
+            //tester.SetHeight(titleParaHeight);
+            //verticalPosition -= 10;
+            //tester.SetFixedPosition((pageWidth - titleParaWidth), verticalPosition - 210, titleParaWidth);
+            //document.Add(tester);
         }
 
         #region helper methods
@@ -256,6 +270,8 @@ namespace PDFCreator
             }
             return text;
         }
+
+        
 
         private enum MergeField
         {
