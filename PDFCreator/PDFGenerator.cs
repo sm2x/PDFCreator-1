@@ -111,7 +111,7 @@ namespace PDFCreator
             listItemFive.SetPaddingBottom(10);
             introList.Add(listItemFive);
 
-            //item 5 nested list
+            //item 5 nested list         
             List item5SubList = new List(ListNumberingType.ZAPF_DINGBATS_2);
             item5SubList.Add("an employer debt only becomes due when an employer incurs a “cessation event”");
             item5SubList.Add("a cessation event normally only occurs when an employer stops employing any active members of the BPS");
@@ -150,6 +150,8 @@ namespace PDFCreator
             item7SubList.SetFontSize(10);
             item7SubList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition, _titleParaWidth);
             _document.Add(item7SubList);
+
+            AddFooter(1);
         }
 
         private void SpoolPageTwo()
@@ -163,24 +165,50 @@ namespace PDFCreator
             //employer debt list
             _verticalPosition -= 220;
             AddTitle("Estimated Employer Debt");
+
             _verticalPosition -= 50;
             List<ListItem> debtList = new List<ListItem>();
             ListItem employerDebtItem1 = new ListItem(GetText(MergeField.EstimatedEmployerDebtParagraph));
             debtList.Add(employerDebtItem1);
-            AddNumberedList(debtList);
+            AddNumberedList(debtList, new Dictionary<int, List<string>>(), 0);
 
             //comparison with previous figure list
             _verticalPosition -= 60;
             AddTitle("Comparison with previous figure");
-            _verticalPosition -= 50;            
+
+            _verticalPosition -= 50;
             List<ListItem> comparisonList = new List<ListItem>();
             ListItem comparisonItem1 = new ListItem(GetText(MergeField.ComparisonPreviousFigure));
             comparisonList.Add(comparisonItem1);
-            AddNumberedList(comparisonList);
+            AddNumberedList(comparisonList, new Dictionary<int, List<string>>(), 0);
 
             //do I need to do anything
-            _verticalPosition -= 50;
+            _verticalPosition -= 40;
             AddTitle("Do I need to do anything?");
+
+            //add list
+            _verticalPosition -= 30;
+            List<ListItem> doINeedListItems = new List<ListItem>
+            {
+                new ListItem(GetText(MergeField.DoINeedItemOne)),
+                new ListItem(GetText(MergeField.DoINeedItemTwo))
+            };
+
+            //add sub list
+            Dictionary<int, List<string>> item2SubList = new Dictionary<int, List<string>>
+            {
+                {   2, //list item 2
+                    new List<string>
+                    {
+                        "The estimated figure provided in this note is only valid for the calendar month following the date of calculation, after which it will be updated to show the latest position",
+                        "The process for settling an employer debt is complex and must be completed within very tight timescales.",
+                        "Settlement on the basis of an estimated employer debt can only take place with the agreement of the pension Trustee. There may be circumstances in which the Trustee requires the debt to be certified instead."
+                    }
+                }
+            };
+
+            AddNumberedList(doINeedListItems, item2SubList, 60);
+
         }
 
         #region helper methods      
@@ -232,6 +260,12 @@ namespace PDFCreator
                 case MergeField.ComparisonPreviousFigure:
                     text = "Figures for individual employers may vary from month to month as a result of changes in Scheme membership (for example, retirements, deaths or transfers out of the Scheme), as well as reflecting the general trend.";
                     break;
+                case MergeField.DoINeedItemOne:
+                    text = "This document is not a demand for payment, and you do not need to take any action.  Your organisation can simply use this information for monitoring the changes to the estimated employer debt over time, while continuing to make the required monthly deficit contributions, provided it continues to employ an active member of the BPS.";
+                    break;
+                case MergeField.DoINeedItemTwo:
+                    text = "If your organisation were to consider incurring a cessation event and settling its employer debt, you should note the following:";
+                    break;
                 default:
                     break;
             }
@@ -251,12 +285,30 @@ namespace PDFCreator
             IntroListItemSix,
             IntroListItemSeven,
             EstimatedEmployerDebtParagraph,
-            ComparisonPreviousFigure
+            ComparisonPreviousFigure,
+            DoINeedItemOne,
+            DoINeedItemTwo
         }
 
         private void NewPage()
         {
             _document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+        }
+
+        private void AddFooter(int pageNumber)
+        {
+            Paragraph footer = new Paragraph(string.Format("{0} \n \n The Baptist Pension Trust Limited (A Company Limited by Guarantee. Registered in England No 03481942)", pageNumber));
+            _titleParaHeight = 126;
+            _titleParaWidth = _pageWidth;
+            footer.SetFontSize(8);
+            PdfFont font = PdfFontFactory.CreateFont(FontConstants.HELVETICA);
+            footer.SetFont(font);
+            footer.SetFontColor(new DeviceRgb(128, 128, 128));
+            footer.SetTextAlignment(TextAlignment.CENTER);
+            footer.SetWidth(_titleParaWidth);
+            footer.SetHeight(_titleParaHeight);
+            footer.SetFixedPosition((_pageWidth - _titleParaWidth), -70, _titleParaWidth);
+            _document.Add(footer);
         }
 
         private void AddLogo()
@@ -287,7 +339,7 @@ namespace PDFCreator
             _document.Add(title);
         }
 
-        private void AddNumberedList(List<ListItem> listItems)
+        private void AddNumberedList(List<ListItem> listItems, Dictionary<int, List<string>> subListItems, int verticleOffset)
         {
             //add list
             List numberedList = new List(ListNumberingType.DECIMAL);
@@ -297,15 +349,31 @@ namespace PDFCreator
             numberedList.SetWidth(_titleParaWidth);
             numberedList.SetMinHeight(150);
 
-            //add list items
-            foreach (var item in listItems)
+            //add the list items
+            for (int i = 0; i < listItems.Count; i++)
             {                
-                item.SetPaddingBottom(10);
-                numberedList.Add(item);
+                //here maybe?
+                listItems[i].SetPaddingBottom(10);
+                numberedList.Add(listItems[i]);
+
+                //add sub items
+                if (subListItems.ContainsKey(i + 1))
+                {
+                    List subList = new List(ListNumberingType.ZAPF_DINGBATS_2);
+                    var subItemList = subListItems[i + 1];
+                    foreach (var subItem in subItemList)
+                    {
+                        subList.Add(subItem);
+                    }
+                    _verticalPosition -= 80;
+                    subList.SetFontSize(10);            
+                    subList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition, _titleParaWidth);                    
+                    _document.Add(subList);
+                }
             }
-            
+
             //add to page
-            numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);
+            numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition + verticleOffset, _titleParaWidth);
             _document.Add(numberedList);
         }
         #endregion
