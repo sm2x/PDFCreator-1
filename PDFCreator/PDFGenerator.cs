@@ -72,7 +72,7 @@ namespace PDFCreator
             _verticalPosition -= 40;
             AddTitle("Introduction");
 
-            //List of items            
+            //List of items
             List introList = new List(ListNumberingType.DECIMAL);
             _titleParaWidth = _pageWidth - _horizontalOffset;
             introList.SetFontSize(10);
@@ -170,7 +170,11 @@ namespace PDFCreator
             List<ListItem> debtList = new List<ListItem>();
             ListItem employerDebtItem1 = new ListItem(GetText(MergeField.EstimatedEmployerDebtParagraph));
             debtList.Add(employerDebtItem1);
-            AddNumberedList(debtList, new Dictionary<int, List<string>>(), 0);
+            List<int> singleItemPadding = new List<int>
+            {
+                10
+            };
+            AddNumberedList(debtList, new Dictionary<int, List<string>>(), 0, 0, singleItemPadding);
 
             //comparison with previous figure list
             _verticalPosition -= 60;
@@ -180,18 +184,24 @@ namespace PDFCreator
             List<ListItem> comparisonList = new List<ListItem>();
             ListItem comparisonItem1 = new ListItem(GetText(MergeField.ComparisonPreviousFigure));
             comparisonList.Add(comparisonItem1);
-            AddNumberedList(comparisonList, new Dictionary<int, List<string>>(), 0);
+            AddNumberedList(comparisonList, new Dictionary<int, List<string>>(), 0, 0, singleItemPadding);
 
             //do I need to do anything
             _verticalPosition -= 40;
             AddTitle("Do I need to do anything?");
 
-            //add list
+            //add list -- go back to this and try figure out the padding, maybe pass through values for list and listitem padding/offsets etc
             _verticalPosition -= 30;
+            List<int> padding = new List<int>
+            {
+                10,
+                10
+            };
             List<ListItem> doINeedListItems = new List<ListItem>
             {
                 new ListItem(GetText(MergeField.DoINeedItemOne)),
-                new ListItem(GetText(MergeField.DoINeedItemTwo))
+                new ListItem(GetText(MergeField.DoINeedItemTwo)),
+                //new ListItem(GetText(MergeField.DoINeedItemThree))
             };
 
             //add sub list
@@ -205,9 +215,19 @@ namespace PDFCreator
                         "Settlement on the basis of an estimated employer debt can only take place with the agreement of the pension Trustee. There may be circumstances in which the Trustee requires the debt to be certified instead."
                     }
                 }
+                //,
+                //{
+                //     3,
+                //    new List<string>
+                //    {
+                //        "Automated Monthly Debt Estimate – Employer Guidance Notes",
+                //        "Employer Debts – Frequently Asked Questions",
+                //        "Automated Monthly Debt Estimate – Settlement Process Guide"
+                //    }
+                //}
             };
 
-            AddNumberedList(doINeedListItems, item2SubList, 60);
+            AddNumberedList(doINeedListItems, item2SubList, 60, 0, padding);
 
         }
 
@@ -266,6 +286,9 @@ namespace PDFCreator
                 case MergeField.DoINeedItemTwo:
                     text = "If your organisation were to consider incurring a cessation event and settling its employer debt, you should note the following:";
                     break;
+                case MergeField.DoINeedItemThree:
+                    text = "To understand fully the implications of and timescales for any decision, you must also read the accompanying documents:";
+                    break;
                 default:
                     break;
             }
@@ -287,7 +310,8 @@ namespace PDFCreator
             EstimatedEmployerDebtParagraph,
             ComparisonPreviousFigure,
             DoINeedItemOne,
-            DoINeedItemTwo
+            DoINeedItemTwo,
+            DoINeedItemThree
         }
 
         private void NewPage()
@@ -339,7 +363,7 @@ namespace PDFCreator
             _document.Add(title);
         }
 
-        private void AddNumberedList(List<ListItem> listItems, Dictionary<int, List<string>> subListItems, int verticleOffset)
+        private void AddNumberedList(List<ListItem> listItems, Dictionary<int, List<string>> subListItems, int verticleOffsetList, int verticleOffsetListItem, List<int> padding)
         {
             //add list
             List numberedList = new List(ListNumberingType.DECIMAL);
@@ -352,8 +376,7 @@ namespace PDFCreator
             //add the list items
             for (int i = 0; i < listItems.Count; i++)
             {                
-                //here maybe?
-                listItems[i].SetPaddingBottom(10);
+                listItems[i].SetPaddingBottom(padding[i]);                
                 numberedList.Add(listItems[i]);
 
                 //add sub items
@@ -366,14 +389,14 @@ namespace PDFCreator
                         subList.Add(subItem);
                     }
                     _verticalPosition -= 80;
-                    subList.SetFontSize(10);            
-                    subList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition, _titleParaWidth);                    
+                    subList.SetFontSize(10);
+                    subList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition + verticleOffsetListItem, _titleParaWidth);
                     _document.Add(subList);
                 }
             }
 
             //add to page
-            numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition + verticleOffset, _titleParaWidth);
+            numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition + verticleOffsetList, _titleParaWidth);
             _document.Add(numberedList);
         }
         #endregion
