@@ -57,6 +57,8 @@ namespace PDFCreator
 
             SpoolPageOne();
             SpoolPageTwo();
+            SpoolPageThree();
+            SpoolPageFour();
 
             _document.Close();
         }
@@ -159,9 +161,7 @@ namespace PDFCreator
         {
             //reset position tracker            
             ResetPosition();
-
             NewPage();
-
             AddLogo();
 
             //employer debt list            
@@ -174,7 +174,7 @@ namespace PDFCreator
             List<ListItem> debtList = new List<ListItem>();
             ListItem employerDebtItem1 = new ListItem(GetText(MergeField.EstimatedEmployerDebtParagraph));
             debtList.Add(employerDebtItem1);
-            
+
             List<int> singleItemPadding = new List<int>
             {
                 10
@@ -240,7 +240,7 @@ namespace PDFCreator
                 120, 30
             };
 
-            AddNumberedListWithSub(doINeedListItems, item2SubList, padding, 330, subOffsets, false);
+            AddNumberedListWithSub(doINeedListItems, item2SubList, padding, 330, subOffsets, false, new List<string>());
 
             MoveDown(110);
 
@@ -252,18 +252,102 @@ namespace PDFCreator
             {
                 new ListItem(GetText(MergeField.HowDebtCalculatedItemOne)),
                 new ListItem(GetText(MergeField.HowDebtCalculatedItemTwo))
-                //new ListItem(GetText(MergeField.HowDebtCalculatedItemThree))
-                //new ListItem(GetText(MergeField.HowDebtCalculatedItemFour))
             };
             List<int> debtPadding = new List<int>
             {
                 10,
-                10                
+                10
             };
 
             AddNumberedListNormal(employerDebtListItems, debtPadding, 330);
 
+            AddFooter(2);
+        }
+
+        private void SpoolPageThree()
+        {
+            ResetPosition();
             NewPage();
+            AddLogo();
+
+            MoveDown(430);
+
+            //AddTitle("Test");
+
+            List<ListItem> employerDebtListItems = new List<ListItem>
+            {
+                new ListItem(GetText(MergeField.HowDebtCalculatedItemThree)),
+                new ListItem(GetText(MergeField.HowDebtCalculatedItemFour)),
+                new ListItem(GetText(MergeField.HowDebtCalculatedItemFive)),
+            };
+            List<int> debtPadding = new List<int>
+            {
+                10,
+                140,
+                10
+            };
+            List<int> subOffsets = new List<int>
+            {
+                140
+            };
+            Dictionary<int, List<string>> howDebtCalculatedSubList = new Dictionary<int, List<string>>
+            {
+                {   2, //list item 2
+                    new List<string>
+                    {
+                        "The estimated deficit in the Scheme at the assumed cessation date.  For the employer debt calculations, this deficit is the difference between the estimated cost of securing all members’ defined benefits with an insurance company and the value of the Scheme’s total assets held.",
+                        "Your organisation’s share of the deficit.  This depends on the value of the benefits earned by your organisation’s current and former ministers who were members of the defined benefit plan whilst in service with you (and in certain circumstances, while in ministry prior to joining your organisation), including any supplementary benefits accrued by those ministers.  It also depends on the equivalent figures for all the other employers still participating in the Scheme."
+                    }
+                }
+            };
+            //when using custom symbols, must use custom symbols for all the list
+            List<string> customSymbol = new List<string>
+            {
+                "3. ",
+                "4. ",
+                "5. "
+            };
+            AddNumberedListWithSub(employerDebtListItems, howDebtCalculatedSubList, debtPadding, 350, subOffsets, false, customSymbol);
+
+            MoveDown(70);
+
+            AddTitle("How does this relate to the contributions we pay each month?");
+
+            MoveDown(230);
+
+            List<ListItem> howDoesRelateListItems = new List<ListItem>
+            {
+                new ListItem(GetText(MergeField.HowDoesRelateItemOne)),
+                new ListItem(GetText(MergeField.HowDoesRelateItemTwo)),
+                new ListItem(GetText(MergeField.HowDoesRelateItemThree)),
+            };
+            List<int> howDoesPadding = new List<int>
+            {
+                10,
+                10,
+                10
+            };
+
+            AddNumberedListNormal(howDoesRelateListItems, howDoesPadding, 330);
+
+            AddFooter(3);
+        }
+
+        private void SpoolPageFour()
+        {
+            ResetPosition();
+            NewPage();            
+            AddLogo();
+
+            MoveDown(230);
+
+            AddTitle("Summary of estimated employer debt calculation");
+
+            MoveDown(10);
+
+            
+
+            AddFooter(4);
         }
 
         #region helper methods      
@@ -273,33 +357,20 @@ namespace PDFCreator
             _path += _rnd.Next(1, 100000);
             _path += ".pdf";
         }
-        
-        private enum MergeField
-        {
-            Title,
-            EstimatedEmployerDebtAt,
-            IntroListItemOnePartOne,
-            IntroListItemOnePartTwo,
-            IntroListItemTwo,
-            IntroListItemThree,
-            IntroListItemFour,
-            IntroListItemFive,
-            IntroListItemSix,
-            IntroListItemSeven,
-            EstimatedEmployerDebtParagraph,
-            ComparisonPreviousFigure,
-            DoINeedItemOne,
-            DoINeedItemTwo,
-            DoINeedItemThree,
-            HowDebtCalculatedItemOne,
-            HowDebtCalculatedItemTwo,
-            HowDebtCalculatedItemThree,
-            HowDebtCalculatedItemFour
-        }
 
         private void NewPage()
         {
             _document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+        }
+
+        private void AddParagraph(string text)
+        {
+            Paragraph para = new Paragraph(text);            
+            para.SetFontSize(9);            
+            para.SetWidth(_pageWidth);
+            para.SetHeight(126);
+            para.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);            
+            _document.Add(para);
         }
 
         private void AddFooter(int pageNumber)
@@ -346,7 +417,7 @@ namespace PDFCreator
             _document.Add(title);
         }
 
-        private void AddNumberedListWithSub(List<ListItem> listItems, Dictionary<int, List<string>> subListItems, List<int> padding, int height, List<int> subOffset, bool addBorders)
+        private void AddNumberedListWithSub(List<ListItem> listItems, Dictionary<int, List<string>> subListItems, List<int> padding, int height, List<int> subOffset, bool addBorders, List<string> customSymbol)
         {
             //add list
             List numberedList = new List(ListNumberingType.DECIMAL);
@@ -358,9 +429,15 @@ namespace PDFCreator
 
             //add the list items
             for (int i = 0; i < listItems.Count; i++)
-            {                             
+            {
                 listItems[i].SetPaddingBottom(padding[i]);
                 numberedList.Add(listItems[i]);
+
+                //add customer symbol if one needed
+                if (customSymbol.Count > 0 && !string.IsNullOrEmpty(customSymbol[i]))
+                {
+                    listItems[i].SetListSymbol(customSymbol[i]);
+                }
 
                 //add sub items
                 if (subListItems.ContainsKey(i + 1))
@@ -379,7 +456,7 @@ namespace PDFCreator
             }
 
             //add to page
-            if(addBorders)
+            if (addBorders)
             {
                 numberedList.SetBorder(Border.NO_BORDER).SetBorderBottom(new SolidBorder(1f)).SetBorderTop(new SolidBorder(1f)).SetBorderLeft(new SolidBorder(1f));
             }
@@ -420,6 +497,34 @@ namespace PDFCreator
         {
             _verticalPosition = _pageHeight;
         }
+
+        private enum MergeField
+        {
+            Title,
+            EstimatedEmployerDebtAt,
+            IntroListItemOnePartOne,
+            IntroListItemOnePartTwo,
+            IntroListItemTwo,
+            IntroListItemThree,
+            IntroListItemFour,
+            IntroListItemFive,
+            IntroListItemSix,
+            IntroListItemSeven,
+            EstimatedEmployerDebtParagraph,
+            ComparisonPreviousFigure,
+            DoINeedItemOne,
+            DoINeedItemTwo,
+            DoINeedItemThree,
+            HowDebtCalculatedItemOne,
+            HowDebtCalculatedItemTwo,
+            HowDebtCalculatedItemThree,
+            HowDebtCalculatedItemFour,
+            HowDebtCalculatedItemFive,
+            HowDoesRelateItemOne,
+            HowDoesRelateItemTwo,
+            HowDoesRelateItemThree
+        }
+
 
         private string GetText(MergeField field)
         {
@@ -482,6 +587,18 @@ namespace PDFCreator
                     break;
                 case MergeField.HowDebtCalculatedItemFour:
                     text = "The size of an employer’s liability to the BPS depends on two main factors:";
+                    break;
+                case MergeField.HowDebtCalculatedItemFive:
+                    text = "It is important to note that the Employer Debt Regulations (2005 and as amended), require any liabilities which cannot specifically be attributed to any current employer (“orphan liabilities”) to be shared amongst all current employers.  These orphan liabilities are part of the Scheme deficit calculation.";
+                    break;
+                case MergeField.HowDoesRelateItemOne:
+                    text = "Your monthly deficiency payments to the defined benefit plan are set every three years to target the deficit in the Scheme at the time.  This deficit is measured using different assumptions from those used to calculate the estimated employer debt.  As a result the monthly contributions are targeting a lower deficit than the very prudent measure that the regulations say must be used for employer debt calculations.";
+                    break;
+                case MergeField.HowDoesRelateItemTwo:
+                    text = "The monthly deficiency payments are at present similar for most employers.  This contrasts with the employer debt calculations, which depend directly on the liabilities in the BPS that relate to each employer.";
+                    break;
+                case MergeField.HowDoesRelateItemThree:
+                    text = "As a result, your estimated employer debt could look very large, or indeed quite small, compared with the amount you might expect to pay on a monthly basis over the period to 2028 (which is the end point of the current plan to address the Scheme deficit).";
                     break;
                 default:
                     break;
