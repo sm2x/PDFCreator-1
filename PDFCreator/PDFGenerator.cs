@@ -66,10 +66,10 @@ namespace PDFCreator
             AddLogo();
             MoveDown(220);
             AddTitle(GetText(MergeField.Title));
-            
+
             MoveDown(30);
             AddTitle(GetText(MergeField.EstimatedEmployerDebtAt));
-            
+
             MoveDown(40);
             AddTitle("Introduction");
 
@@ -79,7 +79,7 @@ namespace PDFCreator
             introList.SetFontSize(10);
             introList.SetTextAlignment(TextAlignment.LEFT);
             introList.SetWidth(_titleParaWidth);
-            introList.SetMinHeight(150);            
+            introList.SetMinHeight(150);
             MoveDown(300);
 
             //Item 1
@@ -140,11 +140,11 @@ namespace PDFCreator
             item7SubList.Add(string.Format("The total due would be greater (potentially significantly greater) if your organisation has previously incurred a separate cessation event. {0}", previousCEWords));
             item7SubList.Add("The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.");
             if (string.IsNullOrEmpty(previousCEWords))
-            {                
+            {
                 MoveDown(140);
             }
             else
-            {                
+            {
                 MoveDown(160);
             }
 
@@ -161,42 +161,50 @@ namespace PDFCreator
             ResetPosition();
 
             NewPage();
+
             AddLogo();
 
             //employer debt list            
             MoveDown(220);
+
             AddTitle("Estimated Employer Debt");
-            
+
             MoveDown(-10);
+
             List<ListItem> debtList = new List<ListItem>();
             ListItem employerDebtItem1 = new ListItem(GetText(MergeField.EstimatedEmployerDebtParagraph));
             debtList.Add(employerDebtItem1);
+            
             List<int> singleItemPadding = new List<int>
             {
                 10
             };
-            AddNumberedListSingle(debtList, 0, singleItemPadding, 90);
+            AddNumberedListNormal(debtList, singleItemPadding, 90);
 
-            MoveDown(120);            
+            MoveDown(120);
+
             //comparison with previous figure list            
             AddTitle("Comparison with previous figure");
 
-            MoveDown(-40);            
+            MoveDown(-40);
+
             List<ListItem> comparisonList = new List<ListItem>();
             ListItem comparisonItem1 = new ListItem(GetText(MergeField.ComparisonPreviousFigure));
             comparisonList.Add(comparisonItem1);
-            AddNumberedListSingle(comparisonList, 0, singleItemPadding, 60);
-            
+            AddNumberedListNormal(comparisonList, singleItemPadding, 60);
+
             MoveDown(120);
+
             //do I need to do anything            
             AddTitle("Do I need to do anything?");
 
             //add list
-            MoveDown(230);            
+            MoveDown(230);
+
             List<int> padding = new List<int>
             {
-                10, 
-                120, //moves top 2
+                10,
+                120,
                 10
             };
             List<ListItem> doINeedListItems = new List<ListItem>
@@ -232,7 +240,30 @@ namespace PDFCreator
                 120, 30
             };
 
-            AddNumberedListWithSub(doINeedListItems, item2SubList, padding, 330, subOffsets);
+            AddNumberedListWithSub(doINeedListItems, item2SubList, padding, 330, subOffsets, false);
+
+            MoveDown(110);
+
+            AddTitle("How has the estimated employer debt been calculated?");
+
+            MoveDown(240);
+
+            List<ListItem> employerDebtListItems = new List<ListItem>
+            {
+                new ListItem(GetText(MergeField.HowDebtCalculatedItemOne)),
+                new ListItem(GetText(MergeField.HowDebtCalculatedItemTwo))
+                //new ListItem(GetText(MergeField.HowDebtCalculatedItemThree))
+                //new ListItem(GetText(MergeField.HowDebtCalculatedItemFour))
+            };
+            List<int> debtPadding = new List<int>
+            {
+                10,
+                10                
+            };
+
+            AddNumberedListNormal(employerDebtListItems, debtPadding, 330);
+
+            NewPage();
         }
 
         #region helper methods      
@@ -241,6 +272,153 @@ namespace PDFCreator
             _path = @"\\bbs-actuaries\dfsdata\users\hodsonl\pdfs\test";
             _path += _rnd.Next(1, 100000);
             _path += ".pdf";
+        }
+        
+        private enum MergeField
+        {
+            Title,
+            EstimatedEmployerDebtAt,
+            IntroListItemOnePartOne,
+            IntroListItemOnePartTwo,
+            IntroListItemTwo,
+            IntroListItemThree,
+            IntroListItemFour,
+            IntroListItemFive,
+            IntroListItemSix,
+            IntroListItemSeven,
+            EstimatedEmployerDebtParagraph,
+            ComparisonPreviousFigure,
+            DoINeedItemOne,
+            DoINeedItemTwo,
+            DoINeedItemThree,
+            HowDebtCalculatedItemOne,
+            HowDebtCalculatedItemTwo,
+            HowDebtCalculatedItemThree,
+            HowDebtCalculatedItemFour
+        }
+
+        private void NewPage()
+        {
+            _document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+        }
+
+        private void AddFooter(int pageNumber)
+        {
+            Paragraph footer = new Paragraph(string.Format("{0} \n \n The Baptist Pension Trust Limited (A Company Limited by Guarantee. Registered in England No 03481942)", pageNumber));
+            _titleParaHeight = 126;
+            _titleParaWidth = _pageWidth;
+            footer.SetFontSize(8);
+            PdfFont font = PdfFontFactory.CreateFont(FontConstants.HELVETICA);
+            footer.SetFont(font);
+            footer.SetFontColor(new DeviceRgb(128, 128, 128));
+            footer.SetTextAlignment(TextAlignment.CENTER);
+            footer.SetWidth(_titleParaWidth);
+            footer.SetHeight(_titleParaHeight);
+            footer.SetFixedPosition((_pageWidth - _titleParaWidth), -70, _titleParaWidth);
+            _document.Add(footer);
+        }
+
+        private void AddLogo()
+        {
+            //logo            
+            string strFilePath = @"\\bbs-actuaries\dfsdata\users\hodsonl\Visual Studio 2017\Projects\PDFCreator\PDFCreator\Images\baptist.png";
+            ImageData l = ImageDataFactory.Create(strFilePath);
+            Image img = new Image(l);
+            img.SetHeight(39);
+            img.SetWidth(110);
+            img.SetFixedPosition(_pageWidth - 180, _pageHeight - 65);
+            _document.Add(img);
+        }
+
+        private void AddTitle(string titleText)
+        {
+            Paragraph title = new Paragraph(titleText);
+            _titleParaHeight = 126;
+            _titleParaWidth = _pageWidth;
+            title.SetFontSize(13);
+            title.SetBold();
+            title.SetTextAlignment(TextAlignment.CENTER);
+            title.SetFontColor(_baptistBlue);
+            title.SetUnderline();
+            title.SetWidth(_titleParaWidth);
+            title.SetHeight(_titleParaHeight);
+            title.SetFixedPosition((_pageWidth - _titleParaWidth), _verticalPosition, _titleParaWidth);
+            _document.Add(title);
+        }
+
+        private void AddNumberedListWithSub(List<ListItem> listItems, Dictionary<int, List<string>> subListItems, List<int> padding, int height, List<int> subOffset, bool addBorders)
+        {
+            //add list
+            List numberedList = new List(ListNumberingType.DECIMAL);
+            _titleParaWidth = _pageWidth - _horizontalOffset;
+            numberedList.SetFontSize(10);
+            numberedList.SetTextAlignment(TextAlignment.LEFT);
+            numberedList.SetWidth(_titleParaWidth);
+            numberedList.SetHeight(height);
+
+            //add the list items
+            for (int i = 0; i < listItems.Count; i++)
+            {                             
+                listItems[i].SetPaddingBottom(padding[i]);
+                numberedList.Add(listItems[i]);
+
+                //add sub items
+                if (subListItems.ContainsKey(i + 1))
+                {
+                    List subList = new List(ListNumberingType.ZAPF_DINGBATS_2);
+                    var subItemList = subListItems[i + 1];
+                    foreach (var subItem in subItemList)
+                    {
+                        subList.Add(subItem);
+                    }
+
+                    subList.SetFontSize(10);
+                    subList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition + subOffset[i - 1], _titleParaWidth);
+                    _document.Add(subList);
+                }
+            }
+
+            //add to page
+            if(addBorders)
+            {
+                numberedList.SetBorder(Border.NO_BORDER).SetBorderBottom(new SolidBorder(1f)).SetBorderTop(new SolidBorder(1f)).SetBorderLeft(new SolidBorder(1f));
+            }
+
+            numberedList.SetKeepTogether(true);
+            numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);
+            _document.Add(numberedList);
+        }
+
+        private void AddNumberedListNormal(List<ListItem> listItems, List<int> padding, int height)
+        {
+            //add list
+            List numberedList = new List(ListNumberingType.DECIMAL);
+            _titleParaWidth = _pageWidth - _horizontalOffset;
+            numberedList.SetFontSize(10);
+            numberedList.SetTextAlignment(TextAlignment.LEFT);
+            numberedList.SetWidth(_titleParaWidth);
+            numberedList.SetHeight(height);
+
+            //add the list items
+            for (int i = 0; i < listItems.Count; i++)
+            {
+                listItems[i].SetPaddingBottom(padding[i]);
+                numberedList.Add(listItems[i]);
+            }
+
+            //add to page            
+            numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);
+            _document.Add(numberedList);
+        }
+
+        private void MoveDown(int numb)
+        {
+            _verticalPosition -= numb;
+        }
+
+        private void ResetPosition()
+        {
+            _verticalPosition = _pageHeight;
         }
 
         private string GetText(MergeField field)
@@ -293,149 +471,22 @@ namespace PDFCreator
                 case MergeField.DoINeedItemThree:
                     text = "To understand fully the implications of and timescales for any decision, you must also read the accompanying documents:";
                     break;
+                case MergeField.HowDebtCalculatedItemOne:
+                    text = "The estimated employer debt is calculated based on the BPS’ funding position and the Trustee's knowledge of the BPS’ liabilities as at the assumed cessation date, based on financial conditions near the month end.  More details are provided in the Guidance Notes and Frequently Asked Questions, and a summary of the calculation for your organisation is shown in Table 1.";
+                    break;
+                case MergeField.HowDebtCalculatedItemTwo:
+                    text = "The estimated employer debt is calculated using the Trustee's record of your organisation’s current and former ministers who were in service with you, as set out in Table 2 of this document. If you do not agree with the record in Table 2, please let us know by emailing Mark Hynes, the Pensions Manager on mhynes@baptist.org.uk";
+                    break;
+                case MergeField.HowDebtCalculatedItemThree:
+                    text = "Your organisation’s pension information is confidential to the BPS and cannot be shared without your permission. However, the Baptist Union Regional Associations have supported a number of churches and other scheme employers understand their obligations and options and you may find it helpful to contact them.";
+                    break;
+                case MergeField.HowDebtCalculatedItemFour:
+                    text = "The size of an employer’s liability to the BPS depends on two main factors:";
+                    break;
                 default:
                     break;
             }
             return text;
-        }
-
-        private enum MergeField
-        {
-            Title,
-            EstimatedEmployerDebtAt,
-            IntroListItemOnePartOne,
-            IntroListItemOnePartTwo,
-            IntroListItemTwo,
-            IntroListItemThree,
-            IntroListItemFour,
-            IntroListItemFive,
-            IntroListItemSix,
-            IntroListItemSeven,
-            EstimatedEmployerDebtParagraph,
-            ComparisonPreviousFigure,
-            DoINeedItemOne,
-            DoINeedItemTwo,
-            DoINeedItemThree
-        }
-
-        private void NewPage()
-        {
-            _document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
-        }
-
-        private void AddFooter(int pageNumber)
-        {
-            Paragraph footer = new Paragraph(string.Format("{0} \n \n The Baptist Pension Trust Limited (A Company Limited by Guarantee. Registered in England No 03481942)", pageNumber));
-            _titleParaHeight = 126;
-            _titleParaWidth = _pageWidth;
-            footer.SetFontSize(8);
-            PdfFont font = PdfFontFactory.CreateFont(FontConstants.HELVETICA);
-            footer.SetFont(font);
-            footer.SetFontColor(new DeviceRgb(128, 128, 128));
-            footer.SetTextAlignment(TextAlignment.CENTER);
-            footer.SetWidth(_titleParaWidth);
-            footer.SetHeight(_titleParaHeight);
-            footer.SetFixedPosition((_pageWidth - _titleParaWidth), -70, _titleParaWidth);
-            _document.Add(footer);
-        }
-
-        private void AddLogo()
-        {
-            //logo            
-            string strFilePath = @"\\bbs-actuaries\dfsdata\users\hodsonl\Visual Studio 2017\Projects\PDFCreator\PDFCreator\Images\baptist.png";
-            ImageData l = ImageDataFactory.Create(strFilePath);
-            Image img = new Image(l);
-            img.SetHeight(39);
-            img.SetWidth(110);
-            img.SetFixedPosition(_pageWidth - 180, _pageHeight - 65);
-            _document.Add(img);
-        }
-
-        private void AddTitle(string titleText)
-        {
-            Paragraph title = new Paragraph(titleText);
-            _titleParaHeight = 126;
-            _titleParaWidth = _pageWidth;
-            title.SetFontSize(13);
-            title.SetBold();
-            title.SetTextAlignment(TextAlignment.CENTER);
-            title.SetFontColor(_baptistBlue);
-            title.SetUnderline();
-            title.SetWidth(_titleParaWidth);
-            title.SetHeight(_titleParaHeight);
-            title.SetFixedPosition((_pageWidth - _titleParaWidth), _verticalPosition, _titleParaWidth);
-            _document.Add(title);
-        }
-
-        private void AddNumberedListWithSub(List<ListItem> listItems, Dictionary<int, List<string>> subListItems, List<int> padding, int height, List<int> subOffset)
-        {
-            //add list
-            List numberedList = new List(ListNumberingType.DECIMAL);
-            _titleParaWidth = _pageWidth - _horizontalOffset;
-            numberedList.SetFontSize(10);
-            numberedList.SetTextAlignment(TextAlignment.LEFT);
-            numberedList.SetWidth(_titleParaWidth);
-            numberedList.SetHeight(height);
-
-            //add the list items
-            for (int i = 0; i < listItems.Count; i++)
-            {                
-                listItems[i].SetPaddingBottom(padding[i]);                
-                numberedList.Add(listItems[i]);
-
-                //add sub items
-                if (subListItems.ContainsKey(i + 1))
-                {
-                    List subList = new List(ListNumberingType.ZAPF_DINGBATS_2);
-                    var subItemList = subListItems[i + 1];                    
-                    foreach (var subItem in subItemList)
-                    {
-                        subList.Add(subItem);
-                    }
-                                
-                    subList.SetFontSize(10);
-                                                      
-                    subList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition + subOffset[i - 1], _titleParaWidth);
-                    _document.Add(subList);
-                }
-            }
-
-            //add to page
-            //numberedList.SetBorder(Border.NO_BORDER).SetBorderBottom(new SolidBorder(1f)).SetBorderTop(new SolidBorder(1f)).SetBorderLeft(new SolidBorder(1f));
-            numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);
-            _document.Add(numberedList);
-        }
-
-        private void AddNumberedListSingle(List<ListItem> listItems, int verticleOffsetList, List<int> padding, int height)
-        {
-            //add list
-            List numberedList = new List(ListNumberingType.DECIMAL);
-            _titleParaWidth = _pageWidth - _horizontalOffset;
-            numberedList.SetFontSize(10);
-            numberedList.SetTextAlignment(TextAlignment.LEFT);
-            numberedList.SetWidth(_titleParaWidth);
-            numberedList.SetHeight(height);
-
-            //add the list items
-            for (int i = 0; i < listItems.Count; i++)
-            {                
-                listItems[i].SetPaddingBottom(padding[i]);                
-                numberedList.Add(listItems[i]);                
-            }
-
-            //add to page            
-            numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);
-            _document.Add(numberedList);
-        }
-
-        private void MoveDown(int numb)
-        {
-            _verticalPosition -= numb;
-        }
-
-        private void ResetPosition()
-        {
-            _verticalPosition = _pageHeight;
         }
         #endregion
     }
