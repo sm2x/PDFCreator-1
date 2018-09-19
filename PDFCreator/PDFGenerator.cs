@@ -192,11 +192,11 @@ namespace PDFCreator
             AddTitle("Do I need to do anything?");
 
             //add list
-            MoveDown(130);            
+            MoveDown(230);            
             List<int> padding = new List<int>
             {
                 10, 
-                90, //moves top 2
+                120, //moves top 2
                 10
             };
             List<ListItem> doINeedListItems = new List<ListItem>
@@ -227,8 +227,12 @@ namespace PDFCreator
                     }
                 }
             };
+            List<int> subOffsets = new List<int>
+            {
+                120, 30
+            };
 
-            //AddNumberedList(doINeedListItems, item2SubList, padding, 500);
+            AddNumberedListWithSub(doINeedListItems, item2SubList, padding, 330, subOffsets);
         }
 
         #region helper methods      
@@ -363,7 +367,7 @@ namespace PDFCreator
             _document.Add(title);
         }
 
-        private void AddNumberedList(List<ListItem> listItems, Dictionary<int, List<string>> subListItems, List<int> padding, int height)
+        private void AddNumberedListWithSub(List<ListItem> listItems, Dictionary<int, List<string>> subListItems, List<int> padding, int height, List<int> subOffset)
         {
             //add list
             List numberedList = new List(ListNumberingType.DECIMAL);
@@ -377,7 +381,6 @@ namespace PDFCreator
             for (int i = 0; i < listItems.Count; i++)
             {                
                 listItems[i].SetPaddingBottom(padding[i]);                
-
                 numberedList.Add(listItems[i]);
 
                 //add sub items
@@ -391,9 +394,8 @@ namespace PDFCreator
                     }
                                 
                     subList.SetFontSize(10);
-                    
-                    //subList.SetBorder(Border.NO_BORDER).SetBorderBottom(new SolidBorder(1f)).SetBorderTop(new SolidBorder(1f));
-                    subList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition, _titleParaWidth);
+                                                      
+                    subList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition + subOffset[i - 1], _titleParaWidth);
                     _document.Add(subList);
                 }
             }
@@ -421,8 +423,7 @@ namespace PDFCreator
                 numberedList.Add(listItems[i]);                
             }
 
-            //add to page
-            //numberedList.SetBorder(Border.NO_BORDER).SetBorderBottom(new SolidBorder(1f)).SetBorderTop(new SolidBorder(1f)).SetBorderLeft(new SolidBorder(1f));
+            //add to page            
             numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);
             _document.Add(numberedList);
         }
