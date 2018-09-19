@@ -7,6 +7,7 @@ using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas;
 using iText.Kernel.Pdf.Colorspace;
 using iText.Layout;
+using iText.Layout.Borders;
 using iText.Layout.Element;
 using iText.Layout.Properties;
 using System;
@@ -63,13 +64,13 @@ namespace PDFCreator
         private void SpoolPageOne()
         {
             AddLogo();
-            _verticalPosition -= 220;
+            MoveDown(220);
             AddTitle(GetText(MergeField.Title));
-
-            _verticalPosition -= 30;
+            
+            MoveDown(30);
             AddTitle(GetText(MergeField.EstimatedEmployerDebtAt));
-
-            _verticalPosition -= 40;
+            
+            MoveDown(40);
             AddTitle("Introduction");
 
             //List of items
@@ -78,8 +79,8 @@ namespace PDFCreator
             introList.SetFontSize(10);
             introList.SetTextAlignment(TextAlignment.LEFT);
             introList.SetWidth(_titleParaWidth);
-            introList.SetMinHeight(150);
-            _verticalPosition -= 300;
+            introList.SetMinHeight(150);            
+            MoveDown(300);
 
             //Item 1
             Paragraph para = new Paragraph();
@@ -139,12 +140,12 @@ namespace PDFCreator
             item7SubList.Add(string.Format("The total due would be greater (potentially significantly greater) if your organisation has previously incurred a separate cessation event. {0}", previousCEWords));
             item7SubList.Add("The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.");
             if (string.IsNullOrEmpty(previousCEWords))
-            {
-                _verticalPosition -= 140;
+            {                
+                MoveDown(140);
             }
             else
-            {
-                _verticalPosition -= 160;
+            {                
+                MoveDown(160);
             }
 
             item7SubList.SetFontSize(10);
@@ -156,17 +157,17 @@ namespace PDFCreator
 
         private void SpoolPageTwo()
         {
-            //reset position tracker
-            _verticalPosition = _pageHeight;
+            //reset position tracker            
+            ResetPosition();
 
             NewPage();
             AddLogo();
 
-            //employer debt list
-            _verticalPosition -= 220;
+            //employer debt list            
+            MoveDown(220);
             AddTitle("Estimated Employer Debt");
-
-            _verticalPosition -= 50;
+            
+            MoveDown(-10);
             List<ListItem> debtList = new List<ListItem>();
             ListItem employerDebtItem1 = new ListItem(GetText(MergeField.EstimatedEmployerDebtParagraph));
             debtList.Add(employerDebtItem1);
@@ -174,34 +175,35 @@ namespace PDFCreator
             {
                 10
             };
-            AddNumberedList(debtList, new Dictionary<int, List<string>>(), 0, 0, singleItemPadding);
+            AddNumberedListSingle(debtList, 0, singleItemPadding, 90);
 
-            //comparison with previous figure list
-            _verticalPosition -= 60;
+            MoveDown(120);            
+            //comparison with previous figure list            
             AddTitle("Comparison with previous figure");
 
-            _verticalPosition -= 50;
+            MoveDown(-40);            
             List<ListItem> comparisonList = new List<ListItem>();
             ListItem comparisonItem1 = new ListItem(GetText(MergeField.ComparisonPreviousFigure));
             comparisonList.Add(comparisonItem1);
-            AddNumberedList(comparisonList, new Dictionary<int, List<string>>(), 0, 0, singleItemPadding);
-
-            //do I need to do anything
-            _verticalPosition -= 40;
+            AddNumberedListSingle(comparisonList, 0, singleItemPadding, 60);
+            
+            MoveDown(120);
+            //do I need to do anything            
             AddTitle("Do I need to do anything?");
 
-            //add list -- go back to this and try figure out the padding, maybe pass through values for list and listitem padding/offsets etc
-            _verticalPosition -= 30;
+            //add list
+            MoveDown(130);            
             List<int> padding = new List<int>
             {
-                10,
+                10, 
+                90, //moves top 2
                 10
             };
             List<ListItem> doINeedListItems = new List<ListItem>
             {
                 new ListItem(GetText(MergeField.DoINeedItemOne)),
                 new ListItem(GetText(MergeField.DoINeedItemTwo)),
-                //new ListItem(GetText(MergeField.DoINeedItemThree))
+                new ListItem(GetText(MergeField.DoINeedItemThree))
             };
 
             //add sub list
@@ -214,28 +216,26 @@ namespace PDFCreator
                         "The process for settling an employer debt is complex and must be completed within very tight timescales.",
                         "Settlement on the basis of an estimated employer debt can only take place with the agreement of the pension Trustee. There may be circumstances in which the Trustee requires the debt to be certified instead."
                     }
+                },
+                {
+                     3,
+                    new List<string>
+                    {
+                        "Automated Monthly Debt Estimate – Employer Guidance Notes",
+                        "Employer Debts – Frequently Asked Questions",
+                        "Automated Monthly Debt Estimate – Settlement Process Guide"
+                    }
                 }
-                //,
-                //{
-                //     3,
-                //    new List<string>
-                //    {
-                //        "Automated Monthly Debt Estimate – Employer Guidance Notes",
-                //        "Employer Debts – Frequently Asked Questions",
-                //        "Automated Monthly Debt Estimate – Settlement Process Guide"
-                //    }
-                //}
             };
 
-            AddNumberedList(doINeedListItems, item2SubList, 60, 0, padding);
-
+            //AddNumberedList(doINeedListItems, item2SubList, padding, 500);
         }
 
         #region helper methods      
         private void GenerateFilePath()
         {
             _path = @"\\bbs-actuaries\dfsdata\users\hodsonl\pdfs\test";
-            _path += _rnd.Next(1, 1000);
+            _path += _rnd.Next(1, 100000);
             _path += ".pdf";
         }
 
@@ -363,7 +363,7 @@ namespace PDFCreator
             _document.Add(title);
         }
 
-        private void AddNumberedList(List<ListItem> listItems, Dictionary<int, List<string>> subListItems, int verticleOffsetList, int verticleOffsetListItem, List<int> padding)
+        private void AddNumberedList(List<ListItem> listItems, Dictionary<int, List<string>> subListItems, List<int> padding, int height)
         {
             //add list
             List numberedList = new List(ListNumberingType.DECIMAL);
@@ -371,33 +371,70 @@ namespace PDFCreator
             numberedList.SetFontSize(10);
             numberedList.SetTextAlignment(TextAlignment.LEFT);
             numberedList.SetWidth(_titleParaWidth);
-            numberedList.SetMinHeight(150);
+            numberedList.SetHeight(height);
 
             //add the list items
             for (int i = 0; i < listItems.Count; i++)
             {                
                 listItems[i].SetPaddingBottom(padding[i]);                
+
                 numberedList.Add(listItems[i]);
 
                 //add sub items
                 if (subListItems.ContainsKey(i + 1))
                 {
                     List subList = new List(ListNumberingType.ZAPF_DINGBATS_2);
-                    var subItemList = subListItems[i + 1];
+                    var subItemList = subListItems[i + 1];                    
                     foreach (var subItem in subItemList)
                     {
                         subList.Add(subItem);
                     }
-                    _verticalPosition -= 80;
+                                
                     subList.SetFontSize(10);
-                    subList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition + verticleOffsetListItem, _titleParaWidth);
+                    
+                    //subList.SetBorder(Border.NO_BORDER).SetBorderBottom(new SolidBorder(1f)).SetBorderTop(new SolidBorder(1f));
+                    subList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition, _titleParaWidth);
                     _document.Add(subList);
                 }
             }
 
             //add to page
-            numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition + verticleOffsetList, _titleParaWidth);
+            //numberedList.SetBorder(Border.NO_BORDER).SetBorderBottom(new SolidBorder(1f)).SetBorderTop(new SolidBorder(1f)).SetBorderLeft(new SolidBorder(1f));
+            numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);
             _document.Add(numberedList);
+        }
+
+        private void AddNumberedListSingle(List<ListItem> listItems, int verticleOffsetList, List<int> padding, int height)
+        {
+            //add list
+            List numberedList = new List(ListNumberingType.DECIMAL);
+            _titleParaWidth = _pageWidth - _horizontalOffset;
+            numberedList.SetFontSize(10);
+            numberedList.SetTextAlignment(TextAlignment.LEFT);
+            numberedList.SetWidth(_titleParaWidth);
+            numberedList.SetHeight(height);
+
+            //add the list items
+            for (int i = 0; i < listItems.Count; i++)
+            {                
+                listItems[i].SetPaddingBottom(padding[i]);                
+                numberedList.Add(listItems[i]);                
+            }
+
+            //add to page
+            //numberedList.SetBorder(Border.NO_BORDER).SetBorderBottom(new SolidBorder(1f)).SetBorderTop(new SolidBorder(1f)).SetBorderLeft(new SolidBorder(1f));
+            numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);
+            _document.Add(numberedList);
+        }
+
+        private void MoveDown(int numb)
+        {
+            _verticalPosition -= numb;
+        }
+
+        private void ResetPosition()
+        {
+            _verticalPosition = _pageHeight;
         }
         #endregion
     }
