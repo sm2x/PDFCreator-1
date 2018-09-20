@@ -61,7 +61,7 @@ namespace PDFCreator
             SpoolPageTwo();
             SpoolPageThree();
             SpoolPageFour();
-
+            SpoolPageFive();
             _document.Close();
         }
 
@@ -364,7 +364,7 @@ namespace PDFCreator
 
             tls.AddCustomParagraph("Table 1", 10, TextAlignment.LEFT, true, true, 100);
 
-            tls.MoveDown(80);
+            tls.MoveDown(290);
             
             //table column widths
             float leftWidth = 100;
@@ -385,13 +385,44 @@ namespace PDFCreator
                 new TableCellsDTO { CellText =  "Liability value relating to your organisation(A)", Width = leftWidth },
                 new TableCellsDTO { CellText =  "£«ChurchLiability»", Width = centerWidth },
                 new TableCellsDTO { CellText =  "This is the BPS actuary’s estimated cost of securing with an insurance company the pension benefits for your organisation - based on membership data as detailed in Table 2 below - as at the assumed cessation date.", Width = rightWidth },
+
+                new TableCellsDTO { CellText =  "Liability value relating to all current employers(B)", Width = leftWidth },
+                new TableCellsDTO { CellText =  "£«TotalAttributableLiability»", Width = centerWidth },
+                new TableCellsDTO { CellText =  "This is the BPS actuary’s estimated cost of securing with an insurance company all the Scheme’s pension liabilities relating to current employers (ie excluding “orphan liabilities”), as at the assumed cessation date", Width = rightWidth },
+
+                new TableCellsDTO { CellText =  "Total Scheme deficit(C)", Width = leftWidth },
+                new TableCellsDTO { CellText =  "£«TotalDeficit»", Width = centerWidth },
+                new TableCellsDTO { CellText =  "This is the BPS actuary’s estimate of the deficit when comparing the Scheme’s total assets with the cost of securing with an insurance company all the Scheme’s pension liabilities (ie including “orphan liabilities”),  as at the assumed cessation date", Width = rightWidth },
+
+                new TableCellsDTO { CellText =  "Cessation Expenses", Width = leftWidth },
+                new TableCellsDTO { CellText =  "£«CessationExpenses»", Width = centerWidth },
+                new TableCellsDTO { CellText =  "Cessation expenses ", Width = rightWidth },
+
+                new TableCellsDTO { CellText =  "Estimated employer debt ", Width = leftWidth },
+                new TableCellsDTO { CellText =  "£«EmployerDebt»", Width = centerWidth },
+                new TableCellsDTO { CellText =  "Based on the calculation of (A) / (B) x (C) + Cessation Expenses", Width = rightWidth },
             };
 
-            tls.AddTable(420, 5, TextAlignment.CENTER, 9, tblCells); 
-         
+            tls.AddTable(420, 5, TextAlignment.CENTER, 9, tblCells);          
             tls.AddFooter(4);
         }
-   
+
+        private void SpoolPageFive()
+        {
+            tls.ResetPosition();
+            tls.NewPage();
+            tls.AddLogo();
+
+            tls.MoveDown(230);
+
+            tls.AddTitle("Summary of membership data for your organisation");
+
+
+
+            tls.AddFooter(4);
+        }
+
+
         public void GenerateFilePath()
         {
             _path = @"\\bbs-actuaries\dfsdata\users\hodsonl\pdfs\test";
