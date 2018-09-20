@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static PDFCreator.DataAccess;
 
 namespace PDFCreator
 {
@@ -38,28 +39,29 @@ namespace PDFCreator
             _baptistBlue = baptistBlue;
             _document.SetMargins(0, 100, 0, 100);
         }
-        public Table AddTable(float width, float padding, TextAlignment alignment, int fontSize)
+        public void AddTable(float width, float padding, TextAlignment alignment, int fontSize, List<TableCellsDTO> tblCells)
         {
             Table table1 = new Table(new float[] { 4, 5, 4 });
             table1.SetWidth(width);
             table1.SetPadding(padding);
             table1.SetTextAlignment(alignment);
             table1.SetFontSize(fontSize);
-            
-            return table1;
-        }
 
-        public void AddTableCell(Table table, string text, float width, bool isBold = false)
-        {
-            if (!isBold)
+            foreach (var cell in tblCells)
             {
-                table.AddCell(new Cell().Add(new Paragraph(text)).SetWidth(width));
+                if (cell.isBold == null || !cell.isBold.Value)
+                {
+                    table1.AddCell(new Cell().Add(new Paragraph(cell.CellText)).SetWidth(cell.Width));
+                }
+                else
+                {
+                    table1.AddCell(new Cell().Add(new Paragraph(cell.CellText)).SetWidth(cell.Width).SetBold());
+                }
             }
-            else
-            {
-                table.AddCell(new Cell().Add(new Paragraph(text)).SetWidth(width).SetBold());
-            }
-        }       
+
+            table1.SetFixedPosition(100, _verticalPosition, table1.GetWidth());
+            _document.Add(table1);
+        }      
 
         public void NewPage()
         {

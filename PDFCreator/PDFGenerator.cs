@@ -365,33 +365,33 @@ namespace PDFCreator
             tls.AddCustomParagraph("Table 1", 10, TextAlignment.LEFT, true, true, 100);
 
             tls.MoveDown(80);
-
-            Table table1 = tls.AddTable(420, 5, TextAlignment.CENTER, 9);
+            
+            //table column widths
             float leftWidth = 100;
             float centerWidth = 160;
             float rightWidth = 160;
 
-            //add a list of table cells (then add the document at the end of the AddTableMethod)
+            //add all the table cells
+            List<TableCellsDTO> tblCells = new List<TableCellsDTO>
+            {
+                new TableCellsDTO { CellText =  "", Width = leftWidth },
+                new TableCellsDTO { CellText =  "Figures for your organisation", Width = centerWidth, isBold = true },
+                new TableCellsDTO { CellText =  "Explanation", Width = rightWidth, isBold = true },
 
-            tls.AddTableCell(table1, "", leftWidth);
-            tls.AddTableCell(table1, "Figures for your organisation", centerWidth, true);
-            tls.AddTableCell(table1, "Explanation", rightWidth, true);
+                new TableCellsDTO { CellText =  "Cessation date", Width = leftWidth },
+                new TableCellsDTO { CellText =  "«CessationDate»(assumed)", Width = centerWidth },
+                new TableCellsDTO { CellText =  "Assumed cessation event for illustration. ", Width = rightWidth },
 
-            tls.AddTableCell(table1, "Liability value relating to your organisation(A)", leftWidth);
-            tls.AddTableCell(table1, string.Format("{0}", _dataAccess), centerWidth);
-            tls.AddTableCell(table1, "This is the BPS actuary’s estimated cost of securing with an insurance company the pension benefits for your organisation - based on membership data as detailed in Table 2 below - as at the assumed cessation date.", rightWidth);
+                new TableCellsDTO { CellText =  "Liability value relating to your organisation(A)", Width = leftWidth },
+                new TableCellsDTO { CellText =  "£«ChurchLiability»", Width = centerWidth },
+                new TableCellsDTO { CellText =  "This is the BPS actuary’s estimated cost of securing with an insurance company the pension benefits for your organisation - based on membership data as detailed in Table 2 below - as at the assumed cessation date.", Width = rightWidth },
+            };
 
-            tls.AddTableCell(table1, "Liability value relating to your organisation(A)", leftWidth);
-            tls.AddTableCell(table1, "£«ChurchLiability»", centerWidth);
-            tls.AddTableCell(table1, "This is the BPS actuary’s estimated cost of securing with an insurance company the pension benefits for your organisation - based on membership data as detailed in Table 2 below - as at the assumed cessation date.", rightWidth);
-
-            table1.SetFixedPosition(100, _verticalPosition, table1.GetWidth());
-            _document.Add(table1);
-
-
+            tls.AddTable(420, 5, TextAlignment.CENTER, 9, tblCells); 
+         
             tls.AddFooter(4);
         }
-
+   
         public void GenerateFilePath()
         {
             _path = @"\\bbs-actuaries\dfsdata\users\hodsonl\pdfs\test";

@@ -17,6 +17,13 @@ namespace PDFCreator
             //call the db, hold object here in memory
             //dbObj = db.tbl_BPSMDEMergeFields(1);
         }
+
+        public string GetMergeData(int mergeFieldId)
+        {
+            return "";
+        }
+
+        //these are for testing purposes, it will return a db obj then the data will be accessed via the columns
         public string GetEmployerName()
         {
             return "Stantonbury Ecumenical Partnership (Milton Keynes)";
@@ -40,6 +47,13 @@ namespace PDFCreator
         public string GetCessationAmount()
         {
             return "£200,000";
+        }
+
+        public class TableCellsDTO
+        {
+            public string CellText { get; set; }
+            public float Width { get; set; }
+            public bool? isBold { get; set; }
         }
 
         public enum MergeField
