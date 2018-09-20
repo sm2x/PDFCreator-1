@@ -417,7 +417,13 @@ namespace PDFCreator
 
             tls.AddTitle("Summary of membership data for your organisation");
 
+            tls.MoveDown(40);
 
+            tls.AddParagraph("For your organisation, the estimated employer debt is based on the service of the minister(s) and their dependants shown in Table 2 below.");
+
+            tls.MoveDown(40);
+
+            tls.AddParagraph("Please note that, for any members that had more than one period of employment with your organisation, the “period of membership” shows the earliest joining date and latest leaving/retirement date.  This is simply for presentation – only the period when the member was in your organisation’s service is included in the calculation of your estimated debt.  For any members who were still in active service with your organisation when the Defined Benefit Plan closed to future accrual on 31 December 2011, the end date for their period of membership will be shown as 2011.The period of membership shown for dependant pensioners is that relating to the original member’s service.");
 
             tls.AddFooter(4);
         }

@@ -76,7 +76,7 @@ namespace PDFCreator
             para.SetWidth(_pageWidth);
             para.SetSpacingRatio(20);
             para.SetHeight(126);
-            para.SetFixedPosition(60, _verticalPosition, _titleParaWidth - 50);
+            para.SetFixedPosition(60, _verticalPosition, _titleParaWidth - 120);
             _document.Add(para);
         }
 
