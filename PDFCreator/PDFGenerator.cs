@@ -35,7 +35,7 @@ namespace PDFCreator
         float _verticalPosition;
         float _titleParaHeight;
         float _titleParaWidth;
-        PDFTools tls;        
+        PDFTools tls;
 
 
         public PDFGenerator()
@@ -45,18 +45,18 @@ namespace PDFCreator
             _pageHeight = ps.GetHeight();
             _horizontalOffset = 130;
             _baptistBlue = new DeviceRgb(0, 176, 240);
-            _dataAccess = new DataAccess(false);
+            _dataAccess = new DataAccess(true);
             _verticalPosition = _pageHeight;
 
             GenerateFilePath(); //remove
             _writer = new PdfWriter(_path);
             _pdf = new PdfDocument(_writer);
             _document = new Document(_pdf);
-            tls = new PDFTools(_document, _pageWidth, _pageHeight, _verticalPosition, _titleParaWidth, _titleParaHeight, _horizontalOffset, _baptistBlue);               
+            tls = new PDFTools(_document, _pageWidth, _pageHeight, _verticalPosition, _titleParaWidth, _titleParaHeight, _horizontalOffset, _baptistBlue);
         }
 
         public void SpoolPDF()
-        {            
+        {
             SpoolPageOne();
             SpoolPageTwo();
             SpoolPageThree();
@@ -77,16 +77,7 @@ namespace PDFCreator
             tls.MoveDown(40);
             tls.AddTitle("Introduction");
 
-
-
-            //List of items
-            List introList = new List(ListNumberingType.DECIMAL);
-            _titleParaWidth = _pageWidth - _horizontalOffset;
-            introList.SetFontSize(10);
-            introList.SetTextAlignment(TextAlignment.LEFT);
-            introList.SetWidth(_titleParaWidth);
-            introList.SetMinHeight(150);
-            tls.MoveDown(300);
+            tls.MoveDown(630);   
 
             //Item 1
             Paragraph para = new Paragraph();
@@ -96,74 +87,82 @@ namespace PDFCreator
             ListItem listItemOne = new ListItem();
             listItemOne.Add(para);
             listItemOne.SetPaddingBottom(10);
-            introList.Add(listItemOne);
 
             //Item 2            
             ListItem listItemTwo = new ListItem(_dataAccess.GetText(MergeField.IntroListItemTwo));
             listItemTwo.SetPaddingBottom(10);
-            introList.Add(listItemTwo);
 
             //Item 3  
             ListItem listItemThree = new ListItem(_dataAccess.GetText(MergeField.IntroListItemThree));
             listItemThree.SetPaddingBottom(10);
-            introList.Add(listItemThree);
 
             //Item 4
             ListItem listItemFour = new ListItem(_dataAccess.GetText(MergeField.IntroListItemFour));
             listItemFour.SetPaddingBottom(10);
-            introList.Add(listItemFour);
 
             //Item 5
             ListItem listItemFive = new ListItem(_dataAccess.GetText(MergeField.IntroListItemFive));
             listItemFive.SetPaddingBottom(10);
-            introList.Add(listItemFive);
-
-            //item 5 nested list         
-            List item5SubList = new List(ListNumberingType.ZAPF_DINGBATS_2);
-            item5SubList.Add("an employer debt only becomes due when an employer incurs a “cessation event”");
-            item5SubList.Add("a cessation event normally only occurs when an employer stops employing any active members of the BPS");
-            item5SubList.SetFontSize(10);
-            item5SubList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition + 115, _titleParaWidth);
-
-            _document.Add(item5SubList);
-            
-            //tls.AddToDocument(item5SubList);
 
             //Item 6
             ListItem listItemSix = new ListItem(_dataAccess.GetText(MergeField.IntroListItemSix));
             listItemSix.SetPaddingBottom(10);
             listItemSix.SetPaddingTop(40);
-            introList.Add(listItemSix);
 
             //item 7
             ListItem listItemSeven = new ListItem(_dataAccess.GetText(MergeField.IntroListItemSeven));
             listItemSeven.SetPaddingBottom(10);
-            introList.Add(listItemSeven);
 
-            introList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);
+            List<ListItem> introListItems = new List<ListItem>
+            {
+                listItemOne,
+                listItemTwo,
+                listItemThree,
+                listItemFour,
+                listItemFive,
+                listItemSix,
+                listItemSeven
+            };
 
-            _document.Add(introList);
-            //tls.AddToDocument(introList);
-
-            //nested list
-            List item7SubList = new List(ListNumberingType.ZAPF_DINGBATS_2);
+            //add sub list
             string previousCEWords = _dataAccess.GetPreviousCEWord();
-            item7SubList.Add(string.Format("The total due would be greater (potentially significantly greater) if your organisation has previously incurred a separate cessation event. {0}", previousCEWords));
-            item7SubList.Add("The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.");
-            if (string.IsNullOrEmpty(previousCEWords))
+            Dictionary<int, List<string>> introSubList = new Dictionary<int, List<string>>
             {
-                tls.MoveDown(140);
-            }
-            else
+                {   5, //list item 2
+                    new List<string>
+                    {
+                        "an employer debt only becomes due when an employer incurs a “cessation event”",
+                        "a cessation event normally only occurs when an employer stops employing any active members of the BPS"
+                    }
+                },
+                {
+                    7,
+                    new List<string>
+                    {
+                        string.Format("The total due would be greater (potentially significantly greater) if your organisation has previously incurred a separate cessation event. {0}", previousCEWords),
+                        "The amount due could be higher or lower if your organisation is currently in a “period of grace” (a “period of grace” applies if you have had a cessation event and you do not currently employ an active member, but you have confirmed that you expect to take on a new employee who will become a BPS member soon).  As a period of grace can only be granted if an employer requests it, your organisation should be aware if a period of grace applies in your case.  If an employer in a period of grace does not take on a new active member before the end of a period of grace, that employer’s debt will be calculated based on the finances of the Scheme at the date of the cessation event rather than at a current date.",
+                    }
+                }
+            };
+
+            List<int> subOffsets = new List<int>
             {
-                tls.MoveDown(160);
-            }
+                0, 0, 0, 0, 440, 0, 170
+            };
 
-            item7SubList.SetFontSize(10);
-            item7SubList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition, _titleParaWidth);
+            //subliststart
+            List<int> intoListPadding = new List<int>
+            {
+                10,
+                10,
+                10,
+                10,
+                string.IsNullOrEmpty(previousCEWords) ? 20 : 10,
+                10,
+                10
+            };
 
-            _document.Add(item7SubList);
-            //tls.AddToDocument(item7SubList);
+            tls.AddNumberedListWithSub(introListItems, introSubList, intoListPadding, 730, subOffsets, false, new List<string>());          
 
             tls.AddFooter(1);
         }
@@ -248,7 +247,7 @@ namespace PDFCreator
             };
             List<int> subOffsets = new List<int>
             {
-                120, 30
+                0, 120, 30
             };
 
             tls.AddNumberedListWithSub(doINeedListItems, item2SubList, padding, 330, subOffsets, false, new List<string>());
@@ -299,7 +298,7 @@ namespace PDFCreator
             };
             List<int> subOffsets = new List<int>
             {
-                140
+               0, 140
             };
             Dictionary<int, List<string>> howDebtCalculatedSubList = new Dictionary<int, List<string>>
             {

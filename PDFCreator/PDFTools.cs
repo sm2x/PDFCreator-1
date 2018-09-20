@@ -179,7 +179,7 @@ namespace PDFCreator
                     }
 
                     subList.SetFontSize(10);
-                    subList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition + subOffset[i - 1], _titleParaWidth);
+                    subList.SetFixedPosition((_pageWidth - _titleParaWidth - 50), _verticalPosition + subOffset[i], _titleParaWidth);
                     _document.Add(subList);
                 }
             }
@@ -189,8 +189,7 @@ namespace PDFCreator
             {
                 numberedList.SetBorder(Border.NO_BORDER).SetBorderBottom(new SolidBorder(1f)).SetBorderTop(new SolidBorder(1f)).SetBorderLeft(new SolidBorder(1f));
             }
-
-            numberedList.SetKeepTogether(true);
+            
             numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);
             _document.Add(numberedList);
         }
