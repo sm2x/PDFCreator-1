@@ -1,7 +1,11 @@
 ﻿using iText.IO.Font;
 using iText.IO.Image;
 using iText.Kernel.Colors;
+using iText.Kernel.Events;
 using iText.Kernel.Font;
+using iText.Kernel.Geom;
+using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas;
 using iText.Layout;
 using iText.Layout.Borders;
 using iText.Layout.Element;
@@ -25,7 +29,7 @@ namespace PDFCreator
         float _titleParaHeight;
         float _horizontalOffset;
         Color _baptistBlue;
-        
+
 
         public PDFTools(Document document, float pageWidth, float pageHeight, float verticalPosition, float titleParaWidth, float titleParaHeight, float horizontalOffset, Color baptistBlue)
         {
@@ -37,15 +41,27 @@ namespace PDFCreator
             titleParaHeight = _titleParaHeight;
             _horizontalOffset = horizontalOffset;
             _baptistBlue = baptistBlue;
-            _document.SetMargins(0, 100, 0, 100);
+            _document.SetMargins(0, 100, 0, 100);                                               
         }
-        public void AddTable(float width, float padding, TextAlignment alignment, int fontSize, List<TableCellsDTO> tblCells)
+
+        /// <summary>
+        /// For adding basic tables to a fixed position on a single page
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="padding"></param>
+        /// <param name="alignment"></param>
+        /// <param name="fontSize"></param>
+        /// <param name="tblCells"></param>
+        /// <param name="tableColumns"></param>
+        /// <param name=""></param>
+        public void AddTable(float width, float padding, TextAlignment alignment, int fontSize, List<TableCellsDTO> tblCells, float[] tableColumns, int? cellHeight = null)
         {
-            Table table1 = new Table(new float[] { 4, 5, 4 });
+            Table table1 = new Table(tableColumns);
             table1.SetWidth(width);
             table1.SetPadding(padding);
             table1.SetTextAlignment(alignment);
             table1.SetFontSize(fontSize);
+            table1.SetKeepTogether(false);
 
             foreach (var cell in tblCells)
             {
@@ -58,16 +74,48 @@ namespace PDFCreator
                     table1.AddCell(new Cell().Add(new Paragraph(cell.CellText)).SetWidth(cell.Width).SetBold());
                 }
             }
-
             table1.SetFixedPosition(100, _verticalPosition, table1.GetWidth());
             _document.Add(table1);
-        }      
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="padding"></param>
+        /// <param name="alignment"></param>
+        /// <param name="fontSize"></param>
+        /// <param name="tblCells"></param>
+        /// <param name="tableColumns"></param>
+        /// <param name="isMultiPage"></param>
+        public void AddTable(float width, float padding, TextAlignment alignment, int fontSize, List<TableCellsDTO> tblCells, float[] tableColumns, int cellCount, int marginTop)
+        {
+            Table table1 = new Table(tableColumns);
+            table1.SetWidth(width);
+            table1.SetPadding(padding);
+            table1.SetTextAlignment(alignment);
+            table1.SetFontSize(fontSize);
+            table1.SetKeepTogether(false);
+
+            foreach (var cell in tblCells.Skip(cellCount))
+            {
+                table1.AddCell(new Cell().Add(new Paragraph(cell.CellText)).SetWidth(cell.Width).SetHeight(30));
+            }
+
+            //only workaround is to do two separate tables, one that fills up this page then one that displays the rest of the users
+            table1.SetRelativePosition(-20, marginTop, 0, 10);
+            _document.Add(table1);
+        }
 
         public void NewPage()
         {
             _document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
         }
 
+        /// <summary>
+        /// For adding a regular paragraph
+        /// </summary>
+        /// <param name="text"></param>
         public void AddParagraph(string text)
         {
             Paragraph para = new Paragraph(text);
@@ -80,7 +128,17 @@ namespace PDFCreator
             _document.Add(para);
         }
 
-        public void AddCustomParagraph(string text, int fontSize, TextAlignment alignment, bool isUnderlined, bool isBold, float leftIndent)
+
+        /// <summary>
+        /// For adding a custom styled paragraph
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="fontSize"></param>
+        /// <param name="alignment"></param>
+        /// <param name="isUnderlined"></param>
+        /// <param name="isBold"></param>
+        /// <param name="leftIndent"></param>
+        public void AddParagraph(string text, int fontSize, TextAlignment alignment, bool isUnderlined, bool isBold, float leftIndent)
         {
             Paragraph para = new Paragraph(text);
             para.SetFontSize(fontSize);
@@ -148,7 +206,17 @@ namespace PDFCreator
             _document.Add(title);
         }
 
-        public void AddNumberedListWithSub(List<ListItem> listItems, Dictionary<int, List<string>> subListItems, List<int> padding, int height, List<int> subOffset, bool addBorders, List<string> customSymbol)
+        /// <summary>
+        /// For adding a numbered list with a sub list in some of the items
+        /// </summary>
+        /// <param name="listItems"></param>
+        /// <param name="subListItems"></param>
+        /// <param name="padding"></param>
+        /// <param name="height"></param>
+        /// <param name="subOffset"></param>
+        /// <param name="addBorders"></param>
+        /// <param name="customSymbol"></param>
+        public void AddNumberedList(List<ListItem> listItems, Dictionary<int, List<string>> subListItems, List<int> padding, int height, List<int> subOffset, bool addBorders, List<string> customSymbol)
         {
             //add list
             List numberedList = new List(ListNumberingType.DECIMAL);
@@ -191,12 +259,18 @@ namespace PDFCreator
             {
                 numberedList.SetBorder(Border.NO_BORDER).SetBorderBottom(new SolidBorder(1f)).SetBorderTop(new SolidBorder(1f)).SetBorderLeft(new SolidBorder(1f));
             }
-            
+
             numberedList.SetFixedPosition((_pageWidth - _titleParaWidth - (_horizontalOffset / 2)), _verticalPosition, _titleParaWidth);
             _document.Add(numberedList);
         }
 
-        public void AddNumberedListNormal(List<ListItem> listItems, List<int> padding, int height)
+        /// <summary>
+        /// For adding a regular numbered list
+        /// </summary>
+        /// <param name="listItems"></param>
+        /// <param name="padding"></param>
+        /// <param name="height"></param>
+        public void AddNumberedList(List<ListItem> listItems, List<int> padding, int height)
         {
             //add list
             List numberedList = new List(ListNumberingType.DECIMAL);
@@ -228,9 +302,7 @@ namespace PDFCreator
             _verticalPosition = _pageHeight;
         }
 
-        public void AddToDocument(List list)
-        {
-            _document.Add(list);
-        }
+       
     }
 }
+

@@ -1,6 +1,7 @@
 ﻿using iText.IO.Font;
 using iText.IO.Image;
 using iText.Kernel.Colors;
+using iText.Kernel.Events;
 using iText.Kernel.Font;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
@@ -20,7 +21,7 @@ using static PDFCreator.DataAccess;
 
 namespace PDFCreator
 {
-    public class PDFGenerator
+    public class PDFGenerator : IEventHandler
     {
         Random _rnd = new Random();
         string _path = "";
@@ -51,6 +52,7 @@ namespace PDFCreator
             GenerateFilePath(); //remove
             _writer = new PdfWriter(_path);
             _pdf = new PdfDocument(_writer);
+            _pdf.AddEventHandler(PdfDocumentEvent.END_PAGE, this);
             _document = new Document(_pdf);
             tls = new PDFTools(_document, _pageWidth, _pageHeight, _verticalPosition, _titleParaWidth, _titleParaHeight, _horizontalOffset, _baptistBlue);
         }
@@ -66,8 +68,7 @@ namespace PDFCreator
         }
 
         private void SpoolPageOne()
-        {
-            tls.AddLogo();
+        {                        
             tls.MoveDown(220);
             tls.AddTitle(_dataAccess.GetText(MergeField.Title));
 
@@ -162,9 +163,8 @@ namespace PDFCreator
                 10
             };
 
-            tls.AddNumberedListWithSub(introListItems, introSubList, intoListPadding, 730, subOffsets, false, new List<string>());          
+            tls.AddNumberedList(introListItems, introSubList, intoListPadding, 730, subOffsets, false, new List<string>());          
 
-            tls.AddFooter(1);
         }
 
         private void SpoolPageTwo()
@@ -172,7 +172,6 @@ namespace PDFCreator
             //reset position tracker            
             tls.ResetPosition();
             tls.NewPage();
-            tls.AddLogo();
 
             //employer debt list            
             tls.MoveDown(220);
@@ -189,7 +188,7 @@ namespace PDFCreator
             {
                 10
             };
-            tls.AddNumberedListNormal(debtList, singleItemPadding, 90);
+            tls.AddNumberedList(debtList, singleItemPadding, 90);
 
             tls.MoveDown(120);
 
@@ -201,7 +200,7 @@ namespace PDFCreator
             List<ListItem> comparisonList = new List<ListItem>();
             ListItem comparisonItem1 = new ListItem(_dataAccess.GetText(MergeField.ComparisonPreviousFigure));
             comparisonList.Add(comparisonItem1);
-            tls.AddNumberedListNormal(comparisonList, singleItemPadding, 60);
+            tls.AddNumberedList(comparisonList, singleItemPadding, 60);
 
             tls.MoveDown(120);
 
@@ -250,7 +249,7 @@ namespace PDFCreator
                 0, 120, 30
             };
 
-            tls.AddNumberedListWithSub(doINeedListItems, item2SubList, padding, 330, subOffsets, false, new List<string>());
+            tls.AddNumberedList(doINeedListItems, item2SubList, padding, 330, subOffsets, false, new List<string>());
 
             tls.MoveDown(110);
 
@@ -269,16 +268,14 @@ namespace PDFCreator
                 10
             };
 
-            tls.AddNumberedListNormal(employerDebtListItems, debtPadding, 330);
+            tls.AddNumberedList(employerDebtListItems, debtPadding, 330);
 
-            tls.AddFooter(2);
         }
 
         private void SpoolPageThree()
         {
             tls.ResetPosition();
-            tls.NewPage();
-            tls.AddLogo();
+            tls.NewPage();            
 
             tls.MoveDown(430);
 
@@ -317,7 +314,7 @@ namespace PDFCreator
                 "4. ",
                 "5. "
             };
-            tls.AddNumberedListWithSub(employerDebtListItems, howDebtCalculatedSubList, debtPadding, 350, subOffsets, false, customSymbol);
+            tls.AddNumberedList(employerDebtListItems, howDebtCalculatedSubList, debtPadding, 350, subOffsets, false, customSymbol);
 
             tls.MoveDown(70);
 
@@ -338,16 +335,14 @@ namespace PDFCreator
                 10
             };
 
-            tls.AddNumberedListNormal(howDoesRelateListItems, howDoesPadding, 330);
+            tls.AddNumberedList(howDoesRelateListItems, howDoesPadding, 330);
 
-            tls.AddFooter(3);
         }
 
         private void SpoolPageFour()
         {
             tls.ResetPosition();
-            tls.NewPage();
-            tls.AddLogo();
+            tls.NewPage();            
 
             tls.MoveDown(230);
 
@@ -362,7 +357,7 @@ namespace PDFCreator
 
             tls.MoveDown(100);
 
-            tls.AddCustomParagraph("Table 1", 10, TextAlignment.LEFT, true, true, 100);
+            tls.AddParagraph("Table 1", 10, TextAlignment.LEFT, true, true, 100);
 
             tls.MoveDown(290);
             
@@ -403,15 +398,13 @@ namespace PDFCreator
                 new TableCellsDTO { CellText =  "Based on the calculation of (A) / (B) x (C) + Cessation Expenses", Width = rightWidth },
             };
 
-            tls.AddTable(420, 5, TextAlignment.CENTER, 9, tblCells);          
-            tls.AddFooter(4);
+            tls.AddTable(420, 5, TextAlignment.CENTER, 9, tblCells, new float[] { 4, 5, 4 });          
         }
 
         private void SpoolPageFive()
         {
             tls.ResetPosition();
-            tls.NewPage();
-            tls.AddLogo();
+            tls.NewPage();            
 
             tls.MoveDown(230);
 
@@ -425,15 +418,74 @@ namespace PDFCreator
 
             tls.AddParagraph("Please note that, for any members that had more than one period of employment with your organisation, the “period of membership” shows the earliest joining date and latest leaving/retirement date.  This is simply for presentation – only the period when the member was in your organisation’s service is included in the calculation of your estimated debt.  For any members who were still in active service with your organisation when the Defined Benefit Plan closed to future accrual on 31 December 2011, the end date for their period of membership will be shown as 2011.The period of membership shown for dependant pensioners is that relating to the original member’s service.");
 
-            tls.AddFooter(4);
+            tls.MoveDown(100);
+
+            tls.AddParagraph("Table 2", 10, TextAlignment.LEFT, true, true, 100);
+
+            tls.MoveDown(100);            
+
+            //table column widths
+            float leftWidth = 10;
+            float centerLeftWidth = 135;
+            float centerRightWidth = 135;
+            float rightWidth = 140;
+
+            int dataCount = 61;
+
+            //add all the table cells
+            List<TableCellsDTO> tblCells = new List<TableCellsDTO>
+            {
+                //loop through items here
+                new TableCellsDTO { CellText =  "", Width = leftWidth, isBold = true },
+                new TableCellsDTO { CellText =  "Member name", Width = centerLeftWidth, isBold = true },
+                new TableCellsDTO { CellText =  "Period of Membership", Width = centerRightWidth, isBold = true },
+                new TableCellsDTO { CellText =  "Current status in the Scheme", Width = rightWidth, isBold = true }                          
+            };
+
+            for (int i = 0; i < 12; i++)
+            {
+                tblCells.Add(new TableCellsDTO { CellText = (i + 1) + ".", Width = leftWidth });
+                tblCells.Add(new TableCellsDTO { CellText = "D P Langdon-Chapman", Width = centerLeftWidth });
+                tblCells.Add(new TableCellsDTO { CellText = "Unknown - Unknown", Width = centerRightWidth });
+                tblCells.Add(new TableCellsDTO { CellText = "Dependant pensioner", Width = rightWidth });
+            }
+
+            //could make a 'tablepage()' method that creates the table and pass in the list of cell items and an offset, then it goes and makes the page, table, cells
+            
+            tls.AddTable(420, 15, TextAlignment.CENTER, 9, tblCells, new float[] { 1, 5, 5, 6 }, 0, 300);            
+
+            List<TableCellsDTO> tblCellsPart2 = new List<TableCellsDTO>();
+
+            for (int i = 0; i < dataCount-12; i++)
+            {
+                tblCellsPart2.Add(new TableCellsDTO { CellText = (12 + (i + 1)) + ".", Width = leftWidth });
+                tblCellsPart2.Add(new TableCellsDTO { CellText = "D P Langdon-Chapman", Width = centerLeftWidth });
+                tblCellsPart2.Add(new TableCellsDTO { CellText = "Unknown - Unknown", Width = centerRightWidth });
+                tblCellsPart2.Add(new TableCellsDTO { CellText = "Dependant pensioner", Width = rightWidth });
+            }
+
+            tls.NewPage();
+
+            tls.AddTable(420, 15, TextAlignment.CENTER, 9, tblCellsPart2, new float[] { 1, 5, 5, 6 }, 0, 10);
         }
 
-
+        
         public void GenerateFilePath()
         {
             _path = @"\\bbs-actuaries\dfsdata\users\hodsonl\pdfs\test";
             _path += _rnd.Next(1, 100000);
             _path += ".pdf";
+        }
+
+        public void HandleEvent(Event e)
+        {            
+            PdfDocumentEvent docEvent = (PdfDocumentEvent)e;
+            PdfDocument pdfDoc = docEvent.GetDocument();
+            PdfPage page = docEvent.GetPage();
+            int pageNumber = pdfDoc.GetPageNumber(page);
+
+            tls.AddFooter(pageNumber);
+            tls.AddLogo();
         }
     }
 }
