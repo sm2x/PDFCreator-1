@@ -41,7 +41,7 @@ namespace PDFCreator
             titleParaHeight = _titleParaHeight;
             _horizontalOffset = horizontalOffset;
             _baptistBlue = baptistBlue;
-            _document.SetMargins(0, 100, 0, 100);                                               
+            _document.SetMargins(80, 100, 50, 100);                                               
         }
 
         /// <summary>
@@ -101,9 +101,8 @@ namespace PDFCreator
             {
                 table1.AddCell(new Cell().Add(new Paragraph(cell.CellText)).SetWidth(cell.Width).SetHeight(30));
             }
-
-            //only workaround is to do two separate tables, one that fills up this page then one that displays the rest of the users
-            table1.SetRelativePosition(-20, marginTop, 0, 10);
+            
+            table1.SetRelativePosition(-20, marginTop, 0, 50);
             _document.Add(table1);
         }
 

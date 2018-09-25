@@ -48,7 +48,6 @@ namespace PDFCreator
             _baptistBlue = new DeviceRgb(0, 176, 240);
             _dataAccess = new DataAccess(true);
             _verticalPosition = _pageHeight;
-
             GenerateFilePath(); //remove
             _writer = new PdfWriter(_path);
             _pdf = new PdfDocument(_writer);
@@ -68,7 +67,9 @@ namespace PDFCreator
         }
 
         private void SpoolPageOne()
-        {                        
+        {
+            tls.AddLogo();
+            tls.AddFooter(1);
             tls.MoveDown(220);
             tls.AddTitle(_dataAccess.GetText(MergeField.Title));
 
@@ -448,11 +449,9 @@ namespace PDFCreator
                 tblCells.Add(new TableCellsDTO { CellText = "D P Langdon-Chapman", Width = centerLeftWidth });
                 tblCells.Add(new TableCellsDTO { CellText = "Unknown - Unknown", Width = centerRightWidth });
                 tblCells.Add(new TableCellsDTO { CellText = "Dependant pensioner", Width = rightWidth });
-            }
-
-            //could make a 'tablepage()' method that creates the table and pass in the list of cell items and an offset, then it goes and makes the page, table, cells
+            }            
             
-            tls.AddTable(420, 15, TextAlignment.CENTER, 9, tblCells, new float[] { 1, 5, 5, 6 }, 0, 300);            
+            tls.AddTable(420, 15, TextAlignment.CENTER, 9, tblCells, new float[] { 1, 5, 5, 6 }, 0, 250);            
 
             List<TableCellsDTO> tblCellsPart2 = new List<TableCellsDTO>();
 
@@ -484,7 +483,7 @@ namespace PDFCreator
             PdfPage page = docEvent.GetPage();
             int pageNumber = pdfDoc.GetPageNumber(page);
 
-            tls.AddFooter(pageNumber);
+            tls.AddFooter(pageNumber + 1);
             tls.AddLogo();
         }
     }
