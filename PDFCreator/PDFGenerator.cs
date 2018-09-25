@@ -37,7 +37,9 @@ namespace PDFCreator
         float _titleParaHeight;
         float _titleParaWidth;
         PDFTools tls;
-
+        int _pageCount;
+        bool footberFinalPageIsSet;
+        int _dataCount;
 
         public PDFGenerator()
         {
@@ -54,6 +56,8 @@ namespace PDFCreator
             _pdf.AddEventHandler(PdfDocumentEvent.END_PAGE, this);
             _document = new Document(_pdf);
             tls = new PDFTools(_document, _pageWidth, _pageHeight, _verticalPosition, _titleParaWidth, _titleParaHeight, _horizontalOffset, _baptistBlue);
+            _dataCount = 1;
+            GetPageCount(_dataCount);
         }
 
         public void SpoolPDF()
@@ -79,7 +83,7 @@ namespace PDFCreator
             tls.MoveDown(40);
             tls.AddTitle("Introduction");
 
-            tls.MoveDown(630);   
+            tls.MoveDown(630);
 
             //Item 1
             Paragraph para = new Paragraph();
@@ -164,7 +168,7 @@ namespace PDFCreator
                 10
             };
 
-            tls.AddNumberedList(introListItems, introSubList, intoListPadding, 730, subOffsets, false, new List<string>());          
+            tls.AddNumberedList(introListItems, introSubList, intoListPadding, 730, subOffsets, false, new List<string>());
 
         }
 
@@ -276,7 +280,7 @@ namespace PDFCreator
         private void SpoolPageThree()
         {
             tls.ResetPosition();
-            tls.NewPage();            
+            tls.NewPage();
 
             tls.MoveDown(430);
 
@@ -343,7 +347,7 @@ namespace PDFCreator
         private void SpoolPageFour()
         {
             tls.ResetPosition();
-            tls.NewPage();            
+            tls.NewPage();
 
             tls.MoveDown(230);
 
@@ -361,7 +365,7 @@ namespace PDFCreator
             tls.AddParagraph("Table 1", 10, TextAlignment.LEFT, true, true, 100);
 
             tls.MoveDown(290);
-            
+
             //table column widths
             float leftWidth = 100;
             float centerWidth = 160;
@@ -399,13 +403,13 @@ namespace PDFCreator
                 new TableCellsDTO { CellText =  "Based on the calculation of (A) / (B) x (C) + Cessation Expenses", Width = rightWidth },
             };
 
-            tls.AddTable(420, 5, TextAlignment.CENTER, 9, tblCells, new float[] { 4, 5, 4 });          
+            tls.AddTable(420, 5, TextAlignment.CENTER, 9, tblCells, new float[] { 4, 5, 4 });
         }
 
         private void SpoolPageFive()
         {
             tls.ResetPosition();
-            tls.NewPage();            
+            tls.NewPage();
 
             tls.MoveDown(230);
 
@@ -423,15 +427,13 @@ namespace PDFCreator
 
             tls.AddParagraph("Table 2", 10, TextAlignment.LEFT, true, true, 100);
 
-            tls.MoveDown(100);            
+            tls.MoveDown(100);
 
             //table column widths
             float leftWidth = 10;
             float centerLeftWidth = 135;
             float centerRightWidth = 135;
-            float rightWidth = 140;
-
-            int dataCount = 61;
+            float rightWidth = 140;            
 
             //add all the table cells
             List<TableCellsDTO> tblCells = new List<TableCellsDTO>
@@ -440,35 +442,72 @@ namespace PDFCreator
                 new TableCellsDTO { CellText =  "", Width = leftWidth, isBold = true },
                 new TableCellsDTO { CellText =  "Member name", Width = centerLeftWidth, isBold = true },
                 new TableCellsDTO { CellText =  "Period of Membership", Width = centerRightWidth, isBold = true },
-                new TableCellsDTO { CellText =  "Current status in the Scheme", Width = rightWidth, isBold = true }                          
+                new TableCellsDTO { CellText =  "Current status in the Scheme", Width = rightWidth, isBold = true }
             };
 
-            for (int i = 0; i < 12; i++)
+            if (_dataCount > 12) //12 rows fit on the first page
             {
-                tblCells.Add(new TableCellsDTO { CellText = (i + 1) + ".", Width = leftWidth });
-                tblCells.Add(new TableCellsDTO { CellText = "D P Langdon-Chapman", Width = centerLeftWidth });
-                tblCells.Add(new TableCellsDTO { CellText = "Unknown - Unknown", Width = centerRightWidth });
-                tblCells.Add(new TableCellsDTO { CellText = "Dependant pensioner", Width = rightWidth });
-            }            
-            
-            tls.AddTable(420, 15, TextAlignment.CENTER, 9, tblCells, new float[] { 1, 5, 5, 6 }, 0, 250);            
+                //add the first page's table
+                for (int i = 0; i < 12; i++)
+                {
+                    tblCells.Add(new TableCellsDTO { CellText = (i + 1) + ".", Width = leftWidth });
+                    tblCells.Add(new TableCellsDTO { CellText = "D P Langdon-Chapman", Width = centerLeftWidth });
+                    tblCells.Add(new TableCellsDTO { CellText = "Unknown - Unknown", Width = centerRightWidth });
+                    tblCells.Add(new TableCellsDTO { CellText = "Dependant pensioner", Width = rightWidth });
+                }
 
-            List<TableCellsDTO> tblCellsPart2 = new List<TableCellsDTO>();
+                tls.AddTable(420, 15, TextAlignment.CENTER, 9, tblCells, new float[] { 1, 5, 5, 6 }, 0, 250);
 
-            for (int i = 0; i < dataCount-12; i++)
-            {
-                tblCellsPart2.Add(new TableCellsDTO { CellText = (12 + (i + 1)) + ".", Width = leftWidth });
-                tblCellsPart2.Add(new TableCellsDTO { CellText = "D P Langdon-Chapman", Width = centerLeftWidth });
-                tblCellsPart2.Add(new TableCellsDTO { CellText = "Unknown - Unknown", Width = centerRightWidth });
-                tblCellsPart2.Add(new TableCellsDTO { CellText = "Dependant pensioner", Width = rightWidth });
+                //build the second + beyond tables (can't overflow tables that start half way down the page)            
+                List<TableCellsDTO> tblCellsPart2 = new List<TableCellsDTO>();
+
+                for (int i = 0; i < _dataCount - 12; i++)
+                {
+                    tblCellsPart2.Add(new TableCellsDTO { CellText = (12 + (i + 1)) + ".", Width = leftWidth });
+                    tblCellsPart2.Add(new TableCellsDTO { CellText = "D P Langdon-Chapman", Width = centerLeftWidth });
+                    tblCellsPart2.Add(new TableCellsDTO { CellText = "Unknown - Unknown", Width = centerRightWidth });
+                    tblCellsPart2.Add(new TableCellsDTO { CellText = "Dependant pensioner", Width = rightWidth });
+                }
+
+                tls.NewPage();
+
+                tls.AddTable(420, 15, TextAlignment.CENTER, 9, tblCellsPart2, new float[] { 1, 5, 5, 6 }, 0, 10);
             }
+            else
+            {
+                //add the first page's table
+                for (int i = 0; i < _dataCount; i++)
+                {
+                    tblCells.Add(new TableCellsDTO { CellText = (i + 1) + ".", Width = leftWidth });
+                    tblCells.Add(new TableCellsDTO { CellText = "D P Langdon-Chapman", Width = centerLeftWidth });
+                    tblCells.Add(new TableCellsDTO { CellText = "Unknown - Unknown", Width = centerRightWidth });
+                    tblCells.Add(new TableCellsDTO { CellText = "Dependant pensioner", Width = rightWidth });
+                }
 
-            tls.NewPage();
-
-            tls.AddTable(420, 15, TextAlignment.CENTER, 9, tblCellsPart2, new float[] { 1, 5, 5, 6 }, 0, 10);
+                tls.AddTable(420, 15, TextAlignment.CENTER, 9, tblCells, new float[] { 1, 5, 5, 6 }, 0, 250);
+            }
         }
 
-        
+        public void GetPageCount(int rowCount)
+        {
+            if(rowCount <= 12)
+            {
+                _pageCount = 5;
+            }
+            else if (rowCount > 12 && rowCount <= 32)
+            {
+                _pageCount = 6;
+            }
+            else if (rowCount > 32 && rowCount <= 51)
+            {
+                _pageCount = 7;
+            }       
+            else
+            {
+                _pageCount = 8;
+            }
+        }
+
         public void GenerateFilePath()
         {
             _path = @"\\bbs-actuaries\dfsdata\users\hodsonl\pdfs\test";
@@ -477,14 +516,32 @@ namespace PDFCreator
         }
 
         public void HandleEvent(Event e)
-        {            
+        {
             PdfDocumentEvent docEvent = (PdfDocumentEvent)e;
             PdfDocument pdfDoc = docEvent.GetDocument();
             PdfPage page = docEvent.GetPage();
             int pageNumber = pdfDoc.GetPageNumber(page);
 
-            tls.AddFooter(pageNumber + 1);
-            tls.AddLogo();
+            if (pageNumber == _pageCount)
+            {
+                if(!footberFinalPageIsSet)
+                {
+                    tls.AddFooter(pageNumber + 1);
+                    tls.AddLogo();
+                    footberFinalPageIsSet = true;
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else
+            {
+                tls.AddFooter(pageNumber + 1);
+                tls.AddLogo();
+                footberFinalPageIsSet = true;
+            }
+
         }
     }
 }

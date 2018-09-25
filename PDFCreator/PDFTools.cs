@@ -41,7 +41,7 @@ namespace PDFCreator
             titleParaHeight = _titleParaHeight;
             _horizontalOffset = horizontalOffset;
             _baptistBlue = baptistBlue;
-            _document.SetMargins(80, 100, 50, 100);                                               
+            _document.SetMargins(80, 100, 80, 100);                                               
         }
 
         /// <summary>
@@ -99,7 +99,15 @@ namespace PDFCreator
 
             foreach (var cell in tblCells.Skip(cellCount))
             {
-                table1.AddCell(new Cell().Add(new Paragraph(cell.CellText)).SetWidth(cell.Width).SetHeight(30));
+                if (cell.isBold == null || !cell.isBold.Value)
+                {
+                    table1.AddCell(new Cell().Add(new Paragraph(cell.CellText)).SetWidth(cell.Width).SetHeight(30));
+                }
+                else
+                {
+                    table1.AddCell(new Cell().Add(new Paragraph(cell.CellText)).SetWidth(cell.Width).SetHeight(30).SetBold());
+                }
+                
             }
             
             table1.SetRelativePosition(-20, marginTop, 0, 50);
